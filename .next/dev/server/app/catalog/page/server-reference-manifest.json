@@ -1,0 +1,50 @@
+{
+  "node": {
+    "4069ab562de7ff92c0418a79efa218997064dd728d": {
+      "workers": {
+        "app/catalog/page": {
+          "moduleId": "[project]/.next-internal/server/app/catalog/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteCatalogItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/catalog/page": "action-browser"
+      },
+      "exportedName": "deleteCatalogItem",
+      "filename": "lib/actions.ts"
+    },
+    "409fc4637e9e5a6486b35ed2e9f952104312224aab": {
+      "workers": {
+        "app/catalog/page": {
+          "moduleId": "[project]/.next-internal/server/app/catalog/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createCatalogItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/catalog/page": "action-browser"
+      },
+      "exportedName": "createCatalogItem",
+      "filename": "lib/actions.ts"
+    },
+    "6086f6391b6829499d70a1855f698a30d66f11323f": {
+      "workers": {
+        "app/catalog/page": {
+          "moduleId": "[project]/.next-internal/server/app/catalog/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateCatalogItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/catalog/page": "action-browser"
+      },
+      "exportedName": "updateCatalogItem",
+      "filename": "lib/actions.ts"
+    }
+  },
+  "edge": {}
+}

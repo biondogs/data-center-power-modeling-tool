@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60bda83eb32e5d974a5fb73673aa31f72f237c5a03": {
+      "workers": {
+        "app/scenarios/[id]/page": {
+          "moduleId": 77491,
+          "async": false,
+          "exportedName": "addLineItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/[id]/page": "action-browser"
+      },
+      "exportedName": "addLineItem",
+      "filename": "lib/actions.ts"
+    }
+  },
+  "edge": {}
+}

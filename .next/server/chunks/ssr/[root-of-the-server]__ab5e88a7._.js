@@ -1,0 +1,3 @@
+module.exports=[63021,(a,b,c)=>{b.exports=a.x("@prisma/client-2c3a283f134fdcb6",()=>require("@prisma/client-2c3a283f134fdcb6"))},66879,a=>{"use strict";var b=a.i(63021);let c=a.g.prisma||new b.PrismaClient({log:["query"]});a.s(["prisma",0,c])},54308,a=>{"use strict";var b=a.i(44445);a.s([],47651),a.i(47651),a.s(["40e00579443dc2f4f6b9c4daaabf42b0aa24e85eb9",()=>b.createCatalogItem,"40f1551dbad53b0dbe1122d40016616d662a1f00c8",()=>b.deleteCatalogItem,"60d8c1fd4c7a69a1088aa8878c8ca010c9628c7504",()=>b.updateCatalogItem],54308)}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__ab5e88a7._.js.map

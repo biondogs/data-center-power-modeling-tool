@@ -1,0 +1,36 @@
+{
+  "node": {
+    "4019d1f10e2a93dee787842af676f662659ebdffa7": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createScenario",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "filename": "lib/actions.ts",
+      "exportedName": "createScenario"
+    },
+    "60fdff4309ae7449ce20faeb0140290c813023011e": {
+      "workers": {
+        "app/scenarios/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/scenarios/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addLineItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/[id]/page": "action-browser"
+      },
+      "filename": "lib/actions.ts",
+      "exportedName": "addLineItem"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "ikQ0NMdKFYeHsv3UzidP8gQYxC/dKwS1uX6JmVIL9Zw="
+}

@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60fdff4309ae7449ce20faeb0140290c813023011e": {
+      "workers": {
+        "app/scenarios/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/scenarios/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addLineItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/[id]/page": "action-browser"
+      },
+      "exportedName": "addLineItem",
+      "filename": "lib/actions.ts"
+    }
+  },
+  "edge": {}
+}

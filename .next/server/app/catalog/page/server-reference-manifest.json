@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40f1551dbad53b0dbe1122d40016616d662a1f00c8": {
+      "workers": {
+        "app/catalog/page": {
+          "moduleId": 54308,
+          "async": false,
+          "exportedName": "deleteCatalogItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/catalog/page": "action-browser"
+      },
+      "exportedName": "deleteCatalogItem",
+      "filename": "lib/actions.ts"
+    },
+    "40e00579443dc2f4f6b9c4daaabf42b0aa24e85eb9": {
+      "workers": {
+        "app/catalog/page": {
+          "moduleId": 54308,
+          "async": false,
+          "exportedName": "createCatalogItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/catalog/page": "action-browser"
+      },
+      "exportedName": "createCatalogItem",
+      "filename": "lib/actions.ts"
+    },
+    "60d8c1fd4c7a69a1088aa8878c8ca010c9628c7504": {
+      "workers": {
+        "app/catalog/page": {
+          "moduleId": 54308,
+          "async": false,
+          "exportedName": "updateCatalogItem",
+          "filename": "lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/catalog/page": "action-browser"
+      },
+      "exportedName": "updateCatalogItem",
+      "filename": "lib/actions.ts"
+    }
+  },
+  "edge": {}
+}

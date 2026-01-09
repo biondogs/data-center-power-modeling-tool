@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Global Hardware Catalog
+// Use a generic model to store all attributes as JSON or explicit fields?
+// Explicit fields are better for type safety in calculation engine.
+model CatalogItem {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String   // GPU, CPU, Storage, Network
+  model       String?  // e.g. H100
+  vendor      String?
+  
+  // Power & Cost Specs
+  powerKw     Float    // Power per server/unit
+  cost        Float    // Capital cost per unit
+  
+  // Capacity Specs
+  capacityType String? // e.g. "GPU", "Cores", "TB"
+  capacityVal  Float?  // Value per unit
+  
+  // Block Definition
+  unitsPerBlock Int    @default(1)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lineItems LineItem[]
+}
+
+// Scenario Container
+model Scenario {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isBase      Boolean  @default(false)
+
+  sites       Site[]
+  assumptions Assumption[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Logical Site (e.g., BayView)
+model Site {
+  id          String   @id @default(uuid())
+  scenarioId  String
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  name        String
+  
+  // Site Specific Constraints / Base Loads
+  baselinePowerMw Float @default(0) // Existing load not in line items
+  powerLimitMw    Float?         // Max capacity
+
+  lineItems   LineItem[]
+
+  @@unique([scenarioId, name])
+}
+
+// Deployment Line Item
+model LineItem {
+  id            String   @id @default(uuid())
+  siteId        String
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  catalogItemId String
+  catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id])
+  
+  projectTag    String?
+  startQuarter  String   // Format: "YYYY-Q1"
+  endQuarter    String?  // Optional: "YYYY-Q4" (if null, runs forever or until model end)
+  quantity      Int
+  
+  // Snapshotting values optionally, or just link to catalog?
+  // Linking means catalog changes affect historical scenarios. 
+  // For now, simple link. If versioning needed, we'd copy values here.
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Global/Scenario Assumptions
+model Assumption {
+  id          String   @id @default(uuid())
+  scenarioId  String
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  key         String   // e.g. "inflation_rate", "cooling_overhead"
+  value       Float
+  
+  @@unique([scenarioId, key])
+}
