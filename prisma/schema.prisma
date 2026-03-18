@@ -7,27 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Global Hardware Catalog
-// Use a generic model to store all attributes as JSON or explicit fields?
-// Explicit fields are better for type safety in calculation engine.
+// Global Hardware Catalog (Power Blocks from Excel)
 model CatalogItem {
   id          String   @id @default(uuid())
   name        String   @unique
   category    String   // GPU, CPU, Storage, Network
   model       String?  // e.g. H100
-  vendor      String?
-  
-  // Power & Cost Specs
-  powerKw     Float    // Power per server/unit
+  vendor      String?  // Build: SMC, Lenovo, Dell, Nvidia
+
+  // Power & Cost Specs (per server/unit)
+  powerKw     Float    // Power per server in kW
   cost        Float    // Capital cost per unit
-  
+
   // Capacity Specs
   capacityType String? // e.g. "GPU", "Cores", "TB"
-  capacityVal  Float?  // Value per unit
-  
-  // Block Definition
-  unitsPerBlock Int    @default(1)
-  
+  capacityVal  Float?  // Value per unit (e.g., 8 GPUs)
+
+  // Resource Consumption per unit (for capacity tracking)
+  // These define what resources each piece of equipment consumes
+  liquidCoolingCapacityKw Float?  // Liquid cooling required per unit (kW)
+  airCoolingCapacityKw    Float?  // Air cooling required per unit (kW)
+  rackSpaceU             Int?     // Rack space in U (1U, 2U, 4U, etc.)
+  electricalCapacityKw   Float?   // Electrical infrastructure per unit (if different from powerKw)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -41,6 +43,10 @@ model Scenario {
   description String?
   isBase      Boolean  @default(false)
 
+  // Global horizon settings
+  horizonStart String  @default("2024Q1")
+  horizonEnd   String  @default("2026Q4")
+
   sites       Site[]
   assumptions Assumption[]
 
@@ -48,53 +54,73 @@ model Scenario {
   updatedAt   DateTime @updatedAt
 }
 
-// Logical Site (e.g., BayView)
+// Site Assessment (per data center location)
+// Mirrors Excel structure: baseline power, capacity limits, rates
 model Site {
   id          String   @id @default(uuid())
   scenarioId  String
   scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  
-  name        String
-  
-  // Site Specific Constraints / Base Loads
-  baselinePowerMw Float @default(0) // Existing load not in line items
-  powerLimitMw    Float?         // Max capacity
+
+  name        String   // e.g., BayView, Mt.Wash, Bloomberg
+
+  // Power Infrastructure Limits (from Excel Baseline Power sheet)
+  totalItCapacityMw    Float @default(0)  // Total IT power capacity available
+  electricalCapacityMw Float @default(0)  // Total electrical infrastructure capacity
+
+  // Cooling Capacities
+  liquidCoolingCapacityKw Float @default(0)  // Liquid cooling capacity (kW)
+  airCoolingCapacityKw    Float @default(0)  // Air cooling capacity (kW)
+
+  // Physical Capacities
+  totalRackSpaceU         Int   @default(0)  // Total rack space available in U
+  usedRackSpaceU          Int   @default(0)  // Currently used rack space (baseline)
+
+  // Site-Specific Electricity Rates (from Power Blocks sheet columns P-Q)
+  electricityRatePerKwh  Float @default(0.10)  // $/kW.h
+  electricityRatePerKwy  Float?                // $/kW.yr (calculated)
+  inflationRate          Float @default(0.10)  // Annual inflation for rates
+
+  // Baseline (Existing) Equipment Power Load
+  // This is the "legacy power" that exists before new deployments
+  baselineItPowerMw       Float @default(0)  // Existing IT equipment load
+  baselineMechanicalMw    Float @default(0)  // Existing mechanical load
+
+  // Baseline Resource Consumption
+  baselineLiquidCoolingKw Float @default(0)  // Existing liquid cooling load
+  baselineAirCoolingKw    Float @default(0)  // Existing air cooling load
+  baselineElectricalKw    Float @default(0)  // Existing electrical load
 
   lineItems   LineItem[]
 
   @@unique([scenarioId, name])
 }
 
-// Deployment Line Item
+// Deployment Line Item (Hardware deployment schedule)
 model LineItem {
   id            String   @id @default(uuid())
   siteId        String
   site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
+
   catalogItemId String
   catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id])
-  
-  projectTag    String?
-  startQuarter  String   // Format: "YYYY-Q1"
-  endQuarter    String?  // Optional: "YYYY-Q4" (if null, runs forever or until model end)
+
+  projectTag    String?  // Project identifier
+  startQuarter  String   // Format: "2024Q1"
+  endQuarter    String?  // null = indefinite or until projection end
   quantity      Int
-  
-  // Snapshotting values optionally, or just link to catalog?
-  // Linking means catalog changes affect historical scenarios. 
-  // For now, simple link. If versioning needed, we'd copy values here.
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
-// Global/Scenario Assumptions
+// Scenario Assumptions (global settings)
 model Assumption {
   id          String   @id @default(uuid())
   scenarioId  String
   scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  
-  key         String   // e.g. "inflation_rate", "cooling_overhead"
+
+  key         String   // e.g., "cooling_overhead_multiplier"
   value       Float
-  
+
   @@unique([scenarioId, key])
 }

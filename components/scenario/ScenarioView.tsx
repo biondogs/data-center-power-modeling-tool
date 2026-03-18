@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SitePlanEditor } from "./SitePlanEditor";
 import { Button } from "@/components/ui/button";
-import { Settings, BarChart2, Table as TableIcon } from "lucide-react";
+import { Settings, BarChart2, Table as TableIcon, FileText, PieChart } from "lucide-react";
 
 type ScenarioWithDetails = Scenario & {
     sites: (Site & {
@@ -18,6 +18,10 @@ type ScenarioWithDetails = Scenario & {
 
 import { SiteProjection } from "@/lib/engine/aggregator";
 import { PowerChart } from "./PowerChart";
+import { ReportTable } from "./ReportTable";
+import { ScenarioSummaryReport } from "./ScenarioSummaryReport";
+import { SiteSettingsEditor } from "./SiteSettingsEditor";
+import { ScenarioSettingsEditor } from "./ScenarioSettingsEditor";
 import { ExportScenarioButton } from "./ExportScenarioButton";
 
 interface ScenarioViewProps {
@@ -59,6 +63,9 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                         </TabsTrigger>
                         <TabsTrigger value="analysis" className="flex items-center gap-2">
                             <BarChart2 className="h-4 w-4" /> Analysis
+                        </TabsTrigger>
+                        <TabsTrigger value="reports" className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" /> Reports
                         </TabsTrigger>
                         <TabsTrigger value="settings" className="flex items-center gap-2">
                             <Settings className="h-4 w-4" /> Settings
@@ -103,13 +110,21 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                     )}
                 </TabsContent>
 
-                <TabsContent value="settings">
-                    <Card>
-                        <CardHeader><CardTitle>Scenario Settings</CardTitle></CardHeader>
-                        <CardContent>
-                            Assumptions editor coming soon.
-                        </CardContent>
-                    </Card>
+                <TabsContent value="reports">
+                    {activeSite ? (
+                        <ReportTable projections={activeProjection} siteName={activeSite.name} />
+                    ) : (
+                        <Card><CardContent className="py-10">No site selected</CardContent></Card>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="settings" className="space-y-6">
+                    <ScenarioSettingsEditor scenarioId={scenario.id} assumptions={scenario.assumptions} />
+                    {activeSite ? (
+                        <SiteSettingsEditor site={activeSite} />
+                    ) : (
+                        <Card><CardContent className="py-10">No site selected</CardContent></Card>
+                    )}
                 </TabsContent>
             </Tabs>
         </div>

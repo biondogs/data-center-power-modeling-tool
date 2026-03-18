@@ -37,11 +37,11 @@ export function CatalogDialog({ item, triggerLabel }: CatalogDialogProps) {
             name: formData.get("name") as string,
             category: formData.get("category") as string,
             vendor: formData.get("vendor") as string,
+            model: formData.get("model") as string,
             powerKw: parseFloat(formData.get("powerKw") as string),
             cost: parseFloat(formData.get("cost") as string),
             capacityType: formData.get("capacityType") as string,
-            capacityVal: parseFloat(formData.get("capacityVal") as string) || 0,
-            unitsPerBlock: 1 // Default for now
+            capacityVal: parseFloat(formData.get("capacityVal") as string) || 0
         };
 
         try {
@@ -100,7 +100,11 @@ export function CatalogDialog({ item, triggerLabel }: CatalogDialogProps) {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="vendor" className="text-right">Vendor</Label>
-                            <Input id="vendor" name="vendor" className="col-span-3" defaultValue={item?.vendor || ""} />
+                            <Input id="vendor" name="vendor" className="col-span-3" defaultValue={item?.vendor || ""} placeholder="e.g. SMC, Lenovo, Dell" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="model" className="text-right">Model</Label>
+                            <Input id="model" name="model" className="col-span-3" defaultValue={item?.model || ""} placeholder="e.g. H100, A100, NVL72" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="powerKw" className="text-right">Power (kW)</Label>
