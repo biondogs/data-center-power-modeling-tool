@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../NonSync/Power%20Modeling%20Tool/app/scenarios/page.tsx"],"sourcesContent":["import { redirect } from \"next/navigation\";\n\nexport default function ScenariosIndex() {\n    redirect(\"/\");\n}\n"],"names":[],"mappings":"qUAAA,EAAA,CAAA,CAAA,MAAA,IAAA,EAAA,EAAA,CAAA,CAAA,OAEe,SAAS,IACpB,CAAA,EAAA,EAAA,QAAA,AAAQ,EAAC,IACb"}

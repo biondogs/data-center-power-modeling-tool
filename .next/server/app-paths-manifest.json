@@ -4,5 +4,6 @@
   "/catalog/page": "app/catalog/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/page": "app/page.js",
-  "/scenarios/[id]/page": "app/scenarios/[id]/page.js"
+  "/scenarios/[id]/page": "app/scenarios/[id]/page.js",
+  "/scenarios/page": "app/scenarios/page.js"
 }

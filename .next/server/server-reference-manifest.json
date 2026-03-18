@@ -1,81 +1,111 @@
 {
   "node": {
-    "403a39e529f77c7543b10179e0b88f5b258999bfbc": {
+    "406fe976cd467cd73d20698bafc14b525ff46b165e": {
       "workers": {
         "app/page": {
-          "moduleId": 36827,
+          "moduleId": 77258,
           "async": false,
           "exportedName": "createScenario",
-          "filename": "lib/actions.ts"
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
         }
       },
       "layer": {
         "app/page": "action-browser"
       },
-      "filename": "lib/actions.ts",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
       "exportedName": "createScenario"
     },
-    "40f1551dbad53b0dbe1122d40016616d662a1f00c8": {
+    "40392c03951eb6cb4a1533e69b0ad08d97c00e57d1": {
       "workers": {
         "app/catalog/page": {
-          "moduleId": 54308,
+          "moduleId": 30256,
           "async": false,
           "exportedName": "deleteCatalogItem",
-          "filename": "lib/actions.ts"
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
         }
       },
       "layer": {
         "app/catalog/page": "action-browser"
       },
-      "filename": "lib/actions.ts",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
       "exportedName": "deleteCatalogItem"
     },
-    "40e00579443dc2f4f6b9c4daaabf42b0aa24e85eb9": {
+    "405753156ad1f214bbf08f34bdb84e86e946ca976f": {
       "workers": {
         "app/catalog/page": {
-          "moduleId": 54308,
+          "moduleId": 30256,
           "async": false,
           "exportedName": "createCatalogItem",
-          "filename": "lib/actions.ts"
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
         }
       },
       "layer": {
         "app/catalog/page": "action-browser"
       },
-      "filename": "lib/actions.ts",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
       "exportedName": "createCatalogItem"
     },
-    "60d8c1fd4c7a69a1088aa8878c8ca010c9628c7504": {
+    "60aeec0059ebe01acff29a0ebeceaabf8242eb207d": {
       "workers": {
         "app/catalog/page": {
-          "moduleId": 54308,
+          "moduleId": 30256,
           "async": false,
           "exportedName": "updateCatalogItem",
-          "filename": "lib/actions.ts"
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
         }
       },
       "layer": {
         "app/catalog/page": "action-browser"
       },
-      "filename": "lib/actions.ts",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
       "exportedName": "updateCatalogItem"
     },
-    "60bda83eb32e5d974a5fb73673aa31f72f237c5a03": {
+    "60330e1c3f9053fafb2c620e8e54a66b6ae49c0b0d": {
       "workers": {
         "app/scenarios/[id]/page": {
-          "moduleId": 77491,
+          "moduleId": 69039,
           "async": false,
           "exportedName": "addLineItem",
-          "filename": "lib/actions.ts"
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
         }
       },
       "layer": {
         "app/scenarios/[id]/page": "action-browser"
       },
-      "filename": "lib/actions.ts",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
       "exportedName": "addLineItem"
+    },
+    "60cf0be491b6052a6dabbae2ff073434b220d7eeb4": {
+      "workers": {
+        "app/scenarios/[id]/page": {
+          "moduleId": 69039,
+          "async": false,
+          "exportedName": "updateSiteSettings",
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/[id]/page": "action-browser"
+      },
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
+      "exportedName": "updateSiteSettings"
+    },
+    "60afe899c8e71ce245b0c4ca07b5b13240d1871c7d": {
+      "workers": {
+        "app/scenarios/[id]/page": {
+          "moduleId": 69039,
+          "async": false,
+          "exportedName": "updateScenarioAssumptions",
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/[id]/page": "action-browser"
+      },
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts",
+      "exportedName": "updateScenarioAssumptions"
     }
   },
   "edge": {},
-  "encryptionKey": "zdaNbX1BBZUuB+OgtW+sHT0KycsktYJLt+0cEyhCBKo="
+  "encryptionKey": "ll3IucTWBqRev6OEW67eJg2pjeaQF6WeVtDuaWkUa2w="
 }

@@ -1,0 +1,3 @@
+module.exports=[19881,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(39608);a.n(d("[project]/NonSync/Power Modeling Tool/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},84567,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(39608);a.n(d("[project]/NonSync/Power Modeling Tool/node_modules/next/dist/client/components/builtin/global-error.js"))},36177,a=>{"use strict";a.i(19881);var b=a.i(84567);a.n(b)}];
+
+//# sourceMappingURL=e5d37_next_dist_client_components_builtin_global-error_5e450ded.js.map

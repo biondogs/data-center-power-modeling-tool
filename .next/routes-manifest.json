@@ -60,6 +60,12 @@
       "regex": "^/favicon\\.ico(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/scenarios",
+      "regex": "^/scenarios(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/scenarios(?:/)?$"
     }
   ],
   "dataRoutes": [],

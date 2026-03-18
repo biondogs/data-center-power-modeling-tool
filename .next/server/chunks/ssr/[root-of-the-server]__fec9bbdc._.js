@@ -1,3 +1,0 @@
-module.exports=[63021,(a,b,c)=>{b.exports=a.x("@prisma/client-2c3a283f134fdcb6",()=>require("@prisma/client-2c3a283f134fdcb6"))},66879,a=>{"use strict";var b=a.i(63021);let c=a.g.prisma||new b.PrismaClient({log:["query"]});a.s(["prisma",0,c])},36827,a=>{"use strict";var b=a.i(44445);a.s([],12136),a.i(12136),a.s(["403a39e529f77c7543b10179e0b88f5b258999bfbc",()=>b.createScenario],36827)}];
-
-//# sourceMappingURL=%5Broot-of-the-server%5D__fec9bbdc._.js.map

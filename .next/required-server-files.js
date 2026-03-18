@@ -141,7 +141,7 @@ self.__SERVER_FILES_MANIFEST={
     }
   },
   "appDir": "/Users/josephbiondo/NonSync/Power Modeling Tool",
-  "relativeAppDir": "",
+  "relativeAppDir": "NonSync/Power Modeling Tool",
   "files": [
     ".next/routes-manifest.json",
     ".next/server/pages-manifest.json",

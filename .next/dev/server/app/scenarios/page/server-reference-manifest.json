@@ -1,4 +1,35 @@
 {
-  "node": {},
+  "node": {
+    "40e3498d754b95548ebd4754d72e701828f1661f97": {
+      "workers": {
+        "app/scenarios/page": {
+          "moduleId": "[project]/NonSync/Power Modeling Tool/.next-internal/server/app/scenarios/page/actions.js { ACTIONS_MODULE0 => \"[project]/NonSync/Power Modeling Tool/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createScenario",
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/page": "action-browser"
+      },
+      "exportedName": "createScenario",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
+    },
+    "405bb359627df51c662de0127fc3f8e88ba46ada78": {
+      "workers": {
+        "app/scenarios/page": {
+          "moduleId": "[project]/NonSync/Power Modeling Tool/.next-internal/server/app/scenarios/page/actions.js { ACTIONS_MODULE0 => \"[project]/NonSync/Power Modeling Tool/lib/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteScenario",
+          "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
+        }
+      },
+      "layer": {
+        "app/scenarios/page": "action-browser"
+      },
+      "exportedName": "deleteScenario",
+      "filename": "NonSync/Power Modeling Tool/lib/actions.ts"
+    }
+  },
   "edge": {}
 }

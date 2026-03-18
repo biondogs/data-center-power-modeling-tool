@@ -36,6 +36,7 @@ export function CatalogTable({ items }: CatalogTableProps) {
                         <TableHead>Name</TableHead>
                         <TableHead>Category</TableHead>
                         <TableHead>Vendor</TableHead>
+                        <TableHead>Model</TableHead>
                         <TableHead className="text-right">Power (kW)</TableHead>
                         <TableHead className="text-right">Cost ($)</TableHead>
                         <TableHead className="text-right">Capacity</TableHead>
@@ -48,6 +49,7 @@ export function CatalogTable({ items }: CatalogTableProps) {
                             <TableCell className="font-medium">{item.name}</TableCell>
                             <TableCell>{item.category}</TableCell>
                             <TableCell>{item.vendor || "-"}</TableCell>
+                            <TableCell>{item.model || "-"}</TableCell>
                             <TableCell className="text-right">{item.powerKw}</TableCell>
                             <TableCell className="text-right">${item.cost.toLocaleString()}</TableCell>
                             <TableCell className="text-right">

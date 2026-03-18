@@ -30,14 +30,20 @@ export async function createScenario(formData: FormData) {
                 name: `${name} (Copy)`,
                 description: description || source.description,
                 isBase: false,
+                horizonStart: source.horizonStart,
+                horizonEnd: source.horizonEnd,
                 assumptions: {
                     create: source.assumptions.map(a => ({ key: a.key, value: a.value }))
                 },
                 sites: {
                     create: source.sites.map(s => ({
                         name: s.name,
-                        powerLimitMw: s.powerLimitMw,
-                        baselinePowerMw: s.baselinePowerMw,
+                        totalItCapacityMw: s.totalItCapacityMw,
+                        electricalCapacityMw: s.electricalCapacityMw,
+                        electricityRatePerKwh: s.electricityRatePerKwh,
+                        inflationRate: s.inflationRate,
+                        baselineItPowerMw: s.baselineItPowerMw,
+                        baselineMechanicalMw: s.baselineMechanicalMw,
                         lineItems: {
                             create: s.lineItems.map(li => ({
                                 catalogItemId: li.catalogItemId,
@@ -57,17 +63,34 @@ export async function createScenario(formData: FormData) {
                 name,
                 description,
                 isBase: false,
+                horizonStart: '2024Q1',
+                horizonEnd: '2026Q4',
                 assumptions: {
                     create: [
-                        { key: 'inflation_rate', value: 0.03 },
+                        { key: 'inflation_rate', value: 0.10 },
                         { key: 'cooling_overhead', value: 1.35 }
                     ]
                 },
                 sites: {
                     create: [
-                        { name: 'BayView', powerLimitMw: 50 },
-                        { name: 'Mt. Wash', powerLimitMw: 30 },
-                        { name: 'Bloomberg', powerLimitMw: 20 }
+                        {
+                            name: 'BayView',
+                            totalItCapacityMw: 12,
+                            electricityRatePerKwh: 0.10,
+                            inflationRate: 0.10
+                        },
+                        {
+                            name: 'Mt.Wash',
+                            totalItCapacityMw: 1.05,
+                            electricityRatePerKwh: 0.0755,
+                            inflationRate: 0.0
+                        },
+                        {
+                            name: 'Bloomberg',
+                            totalItCapacityMw: 1.2,
+                            electricityRatePerKwh: 0.10,
+                            inflationRate: 0.10
+                        }
                     ]
                 }
             }
@@ -98,6 +121,35 @@ export async function addLineItem(siteId: string, data: {
     }
 }
 
+export async function updateLineItem(id: string, data: {
+    catalogItemId?: string;
+    quantity?: number;
+    startQuarter?: string;
+    endQuarter?: string | null;
+    projectTag?: string;
+}) {
+    const item = await prisma.lineItem.findUnique({ where: { id } });
+    if (!item) {
+        throw new Error("Line item not found");
+    }
+
+    await prisma.lineItem.update({
+        where: { id },
+        data: {
+            ...(data.catalogItemId && { catalogItemId: data.catalogItemId }),
+            ...(data.quantity !== undefined && { quantity: data.quantity }),
+            ...(data.startQuarter && { startQuarter: data.startQuarter }),
+            ...(data.endQuarter !== undefined && { endQuarter: data.endQuarter }),
+            ...(data.projectTag !== undefined && { projectTag: data.projectTag }),
+        }
+    });
+
+    const site = await prisma.site.findUnique({ where: { id: item.siteId } });
+    if (site) {
+        revalidatePath(`/scenarios/${site.scenarioId}`);
+    }
+}
+
 export async function deleteLineItem(id: string) {
     const item = await prisma.lineItem.findUnique({ where: { id } });
     if (item) {
@@ -115,26 +167,26 @@ export async function createCatalogItem(data: {
     name: string;
     category: string;
     vendor?: string;
+    model?: string;
     powerKw: number;
     cost: number;
     capacityType?: string;
     capacityVal?: number;
-    unitsPerBlock?: number;
 }) {
     await prisma.catalogItem.create({ data });
     revalidatePath("/catalog");
-    revalidatePath("/"); // Dashboard might use it?
+    revalidatePath("/");
 }
 
 export async function updateCatalogItem(id: string, data: {
     name: string;
     category: string;
     vendor?: string;
+    model?: string;
     powerKw: number;
     cost: number;
     capacityType?: string;
     capacityVal?: number;
-    unitsPerBlock?: number;
 }) {
     await prisma.catalogItem.update({
         where: { id },
@@ -151,4 +203,97 @@ export async function deleteCatalogItem(id: string) {
         console.error("Failed to delete catalog item", e);
         throw new Error("Cannot delete item that is currently in use by a scenario.");
     }
+}
+
+// Site Settings Actions
+
+export async function updateSiteSettings(
+    siteId: string,
+    data: {
+        totalItCapacityMw: number;
+        electricalCapacityMw: number;
+        electricityRatePerKwh: number;
+        inflationRate: number;
+        baselineItPowerMw: number;
+        baselineMechanicalMw: number;
+    }
+) {
+    const site = await prisma.site.update({
+        where: { id: siteId },
+        data
+    });
+
+    revalidatePath(`/scenarios/${site.scenarioId}`);
+}
+
+export async function updateScenarioAssumptions(
+    scenarioId: string,
+    data: {
+        coolingOverhead: number;
+        globalInflation: number;
+    }
+) {
+    const scenario = await prisma.scenario.findUnique({
+        where: { id: scenarioId },
+        include: { assumptions: true }
+    });
+
+    if (!scenario) throw new Error("Scenario not found");
+
+    // Update or create cooling_overhead assumption
+    const coolingAssumption = scenario.assumptions.find(a => a.key === 'cooling_overhead');
+    if (coolingAssumption) {
+        await prisma.assumption.update({
+            where: { id: coolingAssumption.id },
+            data: { value: data.coolingOverhead }
+        });
+    } else {
+        await prisma.assumption.create({
+            data: {
+                scenarioId,
+                key: 'cooling_overhead',
+                value: data.coolingOverhead
+            }
+        });
+    }
+
+    // Update or create inflation_rate assumption
+    const inflationAssumption = scenario.assumptions.find(a => a.key === 'inflation_rate');
+    if (inflationAssumption) {
+        await prisma.assumption.update({
+            where: { id: inflationAssumption.id },
+            data: { value: data.globalInflation }
+        });
+    } else {
+        await prisma.assumption.create({
+            data: {
+                scenarioId,
+                key: 'inflation_rate',
+                value: data.globalInflation
+            }
+        });
+    }
+
+    revalidatePath(`/scenarios/${scenarioId}`);
+}
+
+export async function deleteScenario(id: string) {
+    // Check if scenario is protected (isBase scenarios cannot be deleted)
+    const scenario = await prisma.scenario.findUnique({
+        where: { id }
+    });
+    
+    if (!scenario) {
+        throw new Error("Scenario not found");
+    }
+    
+    if (scenario.isBase) {
+        throw new Error("Base scenarios cannot be deleted");
+    }
+    
+    // Delete scenario and all related data (cascade will handle lineItems, sites, assumptions)
+    await prisma.scenario.delete({ where: { id } });
+    
+    revalidatePath("/");
+    redirect("/");
 }

@@ -10,6 +10,14 @@ export async function getScenarios() {
     return await prisma.scenario.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
+            sites: {
+                include: {
+                    lineItems: {
+                        include: { catalogItem: true }
+                    }
+                }
+            },
+            assumptions: true,
             _count: {
                 select: { sites: true }
             }

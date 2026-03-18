@@ -28,7 +28,7 @@ async function main() {
     const bayView = scenario.sites.find(s => s.name === 'BayView')
     if (!bayView) throw new Error('BayView site not found')
 
-    console.log(`Found Site: ${bayView.name}, Baseline Load: ${bayView.baselinePowerMw} MW`)
+    console.log(`Found Site: ${bayView.name}, Baseline Load: ${bayView.baselineItPowerMw} MW`)
 
     // 2. Simulate a Deployment (if none exists, or just use what's there)
     // Let's create a temporary LineItem in memory (not DB) for testing projection

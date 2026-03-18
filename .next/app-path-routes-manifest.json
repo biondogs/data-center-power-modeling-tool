@@ -4,5 +4,6 @@
   "/catalog/page": "/catalog",
   "/favicon.ico/route": "/favicon.ico",
   "/page": "/",
-  "/scenarios/[id]/page": "/scenarios/[id]"
+  "/scenarios/[id]/page": "/scenarios/[id]",
+  "/scenarios/page": "/scenarios"
 }
