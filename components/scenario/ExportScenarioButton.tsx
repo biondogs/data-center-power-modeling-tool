@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, Database } from "lucide-react";
 import { SiteProjection } from "@/lib/engine/aggregator";
+import { exportScenario } from "@/lib/actions";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,12 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface ExportScenarioButtonProps {
+    scenarioId: string;
     scenarioName: string;
     projections: Record<string, SiteProjection[]>;
     siteNames: Record<string, string>;
 }
 
-export function ExportScenarioButton({ scenarioName, projections, siteNames }: ExportScenarioButtonProps) {
+export function ExportScenarioButton({ scenarioId, scenarioName, projections, siteNames }: ExportScenarioButtonProps) {
 
     const handleCsvExport = () => {
         // 1. Flatten Data
@@ -48,9 +50,34 @@ export function ExportScenarioButton({ scenarioName, projections, siteNames }: E
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", `${scenarioName.replace(/\s+/g, '_')}_export.csv`);
-        document.body.appendChild(link); // Required for FF
+        document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleJsonExport = async () => {
+        try {
+            const result = await exportScenario(scenarioId);
+            
+            if (result.success && result.data) {
+                const jsonStr = JSON.stringify(result.data, null, 2);
+                const blob = new Blob([jsonStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${scenarioName.replace(/[^a-zA-Z0-9-_]/g, "_")}_config_${new Date().toISOString().split("T")[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                alert(`Export failed: ${result.error || "Unknown error"}`);
+            }
+        } catch (e) {
+            console.error("Export failed", e);
+            alert("Export failed. See console for details.");
+        }
     };
 
     const handlePrint = () => {
@@ -66,7 +93,10 @@ export function ExportScenarioButton({ scenarioName, projections, siteNames }: E
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem onClick={handleCsvExport}>
-                    Download CSV
+                    Download CSV (Report)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleJsonExport}>
+                    <Database className="mr-2 h-4 w-4" /> Export Config (JSON)
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handlePrint}>
                     <Printer className="mr-2 h-4 w-4" /> Print / PDF

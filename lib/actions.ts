@@ -354,3 +354,308 @@ export async function deleteScenarios(ids: string[]): Promise<{ success: boolean
         return { success: false, deletedCount: 0, error: "Failed to delete scenarios" };
     }
 }
+
+export async function exportScenario(scenarioId: string): Promise<{
+    success: boolean;
+    data?: {
+        scenario: {
+            id: string;
+            name: string;
+            description: string | null;
+            horizonStart: string;
+            horizonEnd: string;
+            isBase: boolean;
+        };
+        sites: Array<{
+            id: string;
+            name: string;
+            totalItCapacityMw: number;
+            electricalCapacityMw: number;
+            electricityRatePerKwh: number;
+            inflationRate: number;
+            baselineItPowerMw: number;
+            baselineMechanicalMw: number;
+            liquidCoolingCapacityKw: number;
+            airCoolingCapacityKw: number;
+            totalRackSpaceU: number;
+            usedRackSpaceU: number;
+            baselineLiquidCoolingKw: number;
+            baselineAirCoolingKw: number;
+            baselineElectricalKw: number;
+        }>;
+        assumptions: Array<{
+            key: string;
+            value: number;
+        }>;
+        lineItems: Array<{
+            id: string;
+            siteId: string;
+            catalogItemId: string;
+            projectTag: string | null;
+            startQuarter: string;
+            endQuarter: string | null;
+            quantity: number;
+            actualStartQuarter: string | null;
+            actualEndQuarter: string | null;
+            actualQuantity: number | null;
+            varianceNotes: string | null;
+        }>;
+        catalogItems: Array<{
+            id: string;
+            name: string;
+            category: string;
+            model: string | null;
+            vendor: string | null;
+            powerKw: number;
+            cost: number;
+            capacityType: string | null;
+            capacityVal: number | null;
+            liquidCoolingCapacityKw: number | null;
+            airCoolingCapacityKw: number | null;
+            rackSpaceU: number | null;
+            electricalCapacityKw: number | null;
+        }>;
+    };
+    error?: string;
+}> {
+    try {
+        const scenario = await prisma.scenario.findUnique({
+            where: { id: scenarioId },
+            include: {
+                sites: true,
+                assumptions: true,
+            }
+        });
+
+        if (!scenario) {
+            return { success: false, error: "Scenario not found" };
+        }
+
+        // Get all line items for this scenario's sites
+        const siteIds = scenario.sites.map(s => s.id);
+        const lineItems = await prisma.lineItem.findMany({
+            where: { siteId: { in: siteIds } }
+        });
+
+        // Get all referenced catalog items
+        const catalogItemIds = [...new Set(lineItems.map(li => li.catalogItemId))];
+        const catalogItems = catalogItemIds.length > 0
+            ? await prisma.catalogItem.findMany({
+                where: { id: { in: catalogItemIds } }
+            })
+            : [];
+
+        return {
+            success: true,
+            data: {
+                scenario: {
+                    id: scenario.id,
+                    name: scenario.name,
+                    description: scenario.description,
+                    horizonStart: scenario.horizonStart,
+                    horizonEnd: scenario.horizonEnd,
+                    isBase: scenario.isBase,
+                },
+                sites: scenario.sites.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    totalItCapacityMw: s.totalItCapacityMw,
+                    electricalCapacityMw: s.electricalCapacityMw,
+                    electricityRatePerKwh: s.electricityRatePerKwh,
+                    inflationRate: s.inflationRate,
+                    baselineItPowerMw: s.baselineItPowerMw,
+                    baselineMechanicalMw: s.baselineMechanicalMw,
+                    liquidCoolingCapacityKw: s.liquidCoolingCapacityKw,
+                    airCoolingCapacityKw: s.airCoolingCapacityKw,
+                    totalRackSpaceU: s.totalRackSpaceU,
+                    usedRackSpaceU: s.usedRackSpaceU,
+                    baselineLiquidCoolingKw: s.baselineLiquidCoolingKw,
+                    baselineAirCoolingKw: s.baselineAirCoolingKw,
+                    baselineElectricalKw: s.baselineElectricalKw,
+                })),
+                assumptions: scenario.assumptions.map(a => ({
+                    key: a.key,
+                    value: a.value,
+                })),
+                lineItems: lineItems.map(li => ({
+                    id: li.id,
+                    siteId: li.siteId,
+                    catalogItemId: li.catalogItemId,
+                    projectTag: li.projectTag,
+                    startQuarter: li.startQuarter,
+                    endQuarter: li.endQuarter,
+                    quantity: li.quantity,
+                    actualStartQuarter: li.actualStartQuarter,
+                    actualEndQuarter: li.actualEndQuarter,
+                    actualQuantity: li.actualQuantity,
+                    varianceNotes: li.varianceNotes,
+                })),
+                catalogItems: catalogItems.map(ci => ({
+                    id: ci.id,
+                    name: ci.name,
+                    category: ci.category,
+                    model: ci.model,
+                    vendor: ci.vendor,
+                    powerKw: ci.powerKw,
+                    cost: ci.cost,
+                    capacityType: ci.capacityType,
+                    capacityVal: ci.capacityVal,
+                    liquidCoolingCapacityKw: ci.liquidCoolingCapacityKw,
+                    airCoolingCapacityKw: ci.airCoolingCapacityKw,
+                    rackSpaceU: ci.rackSpaceU,
+                    electricalCapacityKw: ci.electricalCapacityKw,
+                })),
+            }
+        };
+    } catch (e) {
+        console.error("Failed to export scenario", e);
+        return { success: false, error: "Failed to export scenario" };
+    }
+}
+
+export async function exportAllScenarios(): Promise<{
+    success: boolean;
+    data?: {
+        exportDate: string;
+        version: string;
+        catalogItems: Array<{
+            id: string;
+            name: string;
+            category: string;
+            model: string | null;
+            vendor: string | null;
+            powerKw: number;
+            cost: number;
+            capacityType: string | null;
+            capacityVal: number | null;
+            liquidCoolingCapacityKw: number | null;
+            airCoolingCapacityKw: number | null;
+            rackSpaceU: number | null;
+            electricalCapacityKw: number | null;
+        }>;
+        scenarios: Array<{
+            id: string;
+            name: string;
+            description: string | null;
+            horizonStart: string;
+            horizonEnd: string;
+            isBase: boolean;
+            sites: Array<{
+                id: string;
+                name: string;
+                totalItCapacityMw: number;
+                electricalCapacityMw: number;
+                electricityRatePerKwh: number;
+                inflationRate: number;
+                baselineItPowerMw: number;
+                baselineMechanicalMw: number;
+                liquidCoolingCapacityKw: number;
+                airCoolingCapacityKw: number;
+                totalRackSpaceU: number;
+                usedRackSpaceU: number;
+                baselineLiquidCoolingKw: number;
+                baselineAirCoolingKw: number;
+                baselineElectricalKw: number;
+                lineItems: Array<{
+                    id: string;
+                    catalogItemId: string;
+                    projectTag: string | null;
+                    startQuarter: string;
+                    endQuarter: string | null;
+                    quantity: number;
+                    actualStartQuarter: string | null;
+                    actualEndQuarter: string | null;
+                    actualQuantity: number | null;
+                    varianceNotes: string | null;
+                }>;
+            }>;
+            assumptions: Array<{
+                key: string;
+                value: number;
+            }>;
+        }>;
+    };
+    error?: string;
+}> {
+    try {
+        const catalogItems = await prisma.catalogItem.findMany();
+        const scenarios = await prisma.scenario.findMany({
+            include: {
+                sites: {
+                    include: {
+                        lineItems: true
+                    }
+                },
+                assumptions: true
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return {
+            success: true,
+            data: {
+                exportDate: new Date().toISOString(),
+                version: "1.0",
+                catalogItems: catalogItems.map(ci => ({
+                    id: ci.id,
+                    name: ci.name,
+                    category: ci.category,
+                    model: ci.model,
+                    vendor: ci.vendor,
+                    powerKw: ci.powerKw,
+                    cost: ci.cost,
+                    capacityType: ci.capacityType,
+                    capacityVal: ci.capacityVal,
+                    liquidCoolingCapacityKw: ci.liquidCoolingCapacityKw,
+                    airCoolingCapacityKw: ci.airCoolingCapacityKw,
+                    rackSpaceU: ci.rackSpaceU,
+                    electricalCapacityKw: ci.electricalCapacityKw,
+                })),
+                scenarios: scenarios.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    description: s.description,
+                    horizonStart: s.horizonStart,
+                    horizonEnd: s.horizonEnd,
+                    isBase: s.isBase,
+                    sites: s.sites.map(site => ({
+                        id: site.id,
+                        name: site.name,
+                        totalItCapacityMw: site.totalItCapacityMw,
+                        electricalCapacityMw: site.electricalCapacityMw,
+                        electricityRatePerKwh: site.electricityRatePerKwh,
+                        inflationRate: site.inflationRate,
+                        baselineItPowerMw: site.baselineItPowerMw,
+                        baselineMechanicalMw: site.baselineMechanicalMw,
+                        liquidCoolingCapacityKw: site.liquidCoolingCapacityKw,
+                        airCoolingCapacityKw: site.airCoolingCapacityKw,
+                        totalRackSpaceU: site.totalRackSpaceU,
+                        usedRackSpaceU: site.usedRackSpaceU,
+                        baselineLiquidCoolingKw: site.baselineLiquidCoolingKw,
+                        baselineAirCoolingKw: site.baselineAirCoolingKw,
+                        baselineElectricalKw: site.baselineElectricalKw,
+                        lineItems: site.lineItems.map(li => ({
+                            id: li.id,
+                            catalogItemId: li.catalogItemId,
+                            projectTag: li.projectTag,
+                            startQuarter: li.startQuarter,
+                            endQuarter: li.endQuarter,
+                            quantity: li.quantity,
+                            actualStartQuarter: li.actualStartQuarter,
+                            actualEndQuarter: li.actualEndQuarter,
+                            actualQuantity: li.actualQuantity,
+                            varianceNotes: li.varianceNotes,
+                        })),
+                    })),
+                    assumptions: s.assumptions.map(a => ({
+                        key: a.key,
+                        value: a.value,
+                    })),
+                })),
+            }
+        };
+    } catch (e) {
+        console.error("Failed to export all scenarios", e);
+        return { success: false, error: "Failed to export all scenarios" };
+    }
+}

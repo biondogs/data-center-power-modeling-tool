@@ -70,6 +70,7 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                         What-If
                     </Button>
                     <ExportScenarioButton
+                        scenarioId={scenario.id}
                         scenarioName={scenario.name}
                         projections={projections}
                         siteNames={siteNames}
