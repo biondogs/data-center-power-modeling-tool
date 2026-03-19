@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -26,6 +27,7 @@ export function EditLineItemDialog({ lineItem, catalogItems }: EditLineItemDialo
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     async function onSubmit(formData: FormData) {
         setLoading(true);
@@ -45,6 +47,7 @@ export function EditLineItemDialog({ lineItem, catalogItems }: EditLineItemDialo
                 endQuarter: endQuarter || null,
                 projectTag
             });
+            router.refresh();
             setOpen(false);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to update line item");

@@ -327,7 +327,11 @@ describe('WhatIfEngine', () => {
                     quantity: 5,
                     startQuarter: '2024Q1',
                     endQuarter: '2024Q2',
-                    projectTag: 'Test-Project'
+                    projectTag: 'Test-Project',
+                    actualStartQuarter: null,
+                    actualEndQuarter: null,
+                    actualQuantity: null,
+                    varianceNotes: null
                 },
                 catalogItem
             };
@@ -353,7 +357,11 @@ describe('WhatIfEngine', () => {
                     quantity: 10,
                     startQuarter: '2024Q1',
                     endQuarter: '2024Q1',
-                    projectTag: 'Test-Project'
+                    projectTag: 'Test-Project',
+                    actualStartQuarter: null,
+                    actualEndQuarter: null,
+                    actualQuantity: null,
+                    varianceNotes: null
                 },
                 catalogItem
             };

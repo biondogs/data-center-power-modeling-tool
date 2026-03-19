@@ -1,6 +1,7 @@
 "use client";
 
 import { Site, LineItem, CatalogItem } from "@prisma/client";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddLineItemDialog } from "./AddLineItemDialog";
 import { EditLineItemDialog } from "./EditLineItemDialog";
@@ -16,6 +17,13 @@ interface SitePlanEditorProps {
 }
 
 export function SitePlanEditor({ site, catalogItems }: SitePlanEditorProps) {
+    const router = useRouter();
+
+    async function handleDelete(lineItemId: string) {
+        await deleteLineItem(lineItemId);
+        router.refresh();
+    }
+
     return (
         <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between py-4">
@@ -57,7 +65,7 @@ export function SitePlanEditor({ site, catalogItems }: SitePlanEditorProps) {
                                         <td className="p-4 text-center">
                                             <div className="flex items-center justify-center gap-1">
                                                 <EditLineItemDialog lineItem={item} catalogItems={catalogItems} />
-                                                <form action={() => deleteLineItem(item.id)}>
+                                                <form action={() => handleDelete(item.id)}>
                                                     <Button 
                                                         type="submit" 
                                                         variant="ghost" 

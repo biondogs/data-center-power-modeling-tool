@@ -13,6 +13,7 @@ import { PowerChart } from "@/components/scenario/PowerChart";
 import { ReportTable } from "@/components/scenario/ReportTable";
 import { DashboardSummary } from "./DashboardSummary";
 import { ScenarioAggregateChart } from "./ScenarioAggregateChart";
+import { ExportAllButton } from "@/components/ExportAllButton";
 
 type ScenarioWithDetails = Scenario & {
     sites: (Site & {
@@ -67,11 +68,14 @@ export function DashboardView({ scenarios, catalogItems, scenarioProjections }: 
                         View analysis and reports for any scenario.
                     </p>
                 </div>
-                <Button asChild>
-                    <Link href="/scenarios">
-                        Manage Scenarios <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <ExportAllButton />
+                    <Button asChild>
+                        <Link href="/scenarios">
+                            Manage Scenarios <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <DashboardSummary scenarioProjections={scenarioProjections} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -26,6 +27,7 @@ interface AddLineItemDialogProps {
 export function AddLineItemDialog({ siteId, catalogItems }: AddLineItemDialogProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     async function onSubmit(formData: FormData) {
         setLoading(true);
@@ -42,6 +44,7 @@ export function AddLineItemDialog({ siteId, catalogItems }: AddLineItemDialogPro
             endQuarter,
             projectTag
         });
+        router.refresh();
         setLoading(false);
         setOpen(false);
     }
