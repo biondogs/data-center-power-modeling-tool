@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:binary": "npm run build && npm run build:caxa",
+    "build:caxa": "npx caxa --input . --output data-center-tool --upx --exclude 'node_modules/.cache' --exclude '.next/cache' --exclude '.git' -- '{{caxa}}/node_modules/.bin/node' '{{caxa}}/.next/standalone/server.js'",
+    "build:caxa:windows": "npx caxa --input . --output data-center-tool.exe --upx --exclude 'node_modules/.cache' --exclude '.next/cache' --exclude '.git' -- '{{caxa}}/node_modules/.bin/node.exe' '{{caxa}}/.next/standalone/server.js'",
+    "docker:build": "docker build -t data-center-tool .",
+    "docker:run": "docker-compose up"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -42,6 +47,7 @@
   },
   "devDependencies": {
     "@prisma/client": "^6.19.1",
+    "@appthreat/caxa": "^2.0.13",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
