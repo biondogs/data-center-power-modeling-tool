@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/josephbiondo/NonSync/Power%20Modeling%20Tool/app/scenarios/page.tsx"],"sourcesContent":["import { redirect } from \"next/navigation\";\n\nexport default function ScenariosIndex() {\n    redirect(\"/\");\n}\n"],"names":[],"mappings":";;;;AAAA;AAAA;;AAEe,SAAS;IACpB,IAAA,iMAAQ,EAAC;AACb"}}]
-}
