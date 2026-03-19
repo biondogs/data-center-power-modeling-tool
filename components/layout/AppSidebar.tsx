@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Database, FileSpreadsheet, Settings } from "lucide-react";
+import { LayoutDashboard, Database, FileSpreadsheet, GitCompare } from "lucide-react";
 
 export function AppSidebar() {
     const pathname = usePathname();
@@ -11,6 +11,7 @@ export function AppSidebar() {
     const links = [
         { href: "/", label: "Dashboard", icon: LayoutDashboard },
         { href: "/scenarios", label: "Scenarios", icon: FileSpreadsheet },
+        { href: "/scenarios/compare", label: "Compare", icon: GitCompare },
         { href: "/catalog", label: "Catalog", icon: Database },
     ];
 

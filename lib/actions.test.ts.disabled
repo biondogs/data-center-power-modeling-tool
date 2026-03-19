@@ -1,0 +1,210 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+    createScenario,
+    deleteScenario,
+    addLineItem,
+    updateLineItem,
+    deleteLineItem,
+    updateScenarioAssumptions
+} from './actions';
+import { prisma } from './db';
+
+describe('Server Actions Integration', () => {
+    let testScenarioId: string;
+    let testSiteId: string;
+    let testCatalogItemId: string;
+
+    beforeEach(async () => {
+        const catalogItem = await prisma.catalogItem.create({
+            data: {
+                name: `Test-GPU-${Date.now()}`,
+                category: 'GPU',
+                vendor: 'Test',
+                model: 'TestModel',
+                powerKw: 10,
+                cost: 100000,
+                capacityType: 'GPU',
+                capacityVal: 8
+            }
+        });
+        testCatalogItemId = catalogItem.id;
+
+        const scenario = await prisma.scenario.create({
+            data: {
+                name: `Test Scenario ${Date.now()}`,
+                description: 'Test scenario for integration tests',
+                isBase: false,
+                horizonStart: '2024Q1',
+                horizonEnd: '2025Q4',
+                assumptions: {
+                    create: [
+                        { key: 'inflation_rate', value: 0.10 },
+                        { key: 'cooling_overhead', value: 1.35 }
+                    ]
+                },
+                sites: {
+                    create: {
+                        name: 'TestSite',
+                        totalItCapacityMw: 10,
+                        electricalCapacityMw: 10,
+                        electricityRatePerKwh: 0.10,
+                        inflationRate: 0.10,
+                        baselineItPowerMw: 1,
+                        baselineMechanicalMw: 0.5
+                    }
+                }
+            },
+            include: {
+                sites: true
+            }
+        });
+        testScenarioId = scenario.id;
+        testSiteId = scenario.sites[0].id;
+    });
+
+    describe('Scenario Management', () => {
+        it('should create a new scenario', async () => {
+            const formData = new FormData();
+            formData.append('name', 'New Test Scenario');
+            formData.append('description', 'Created via test');
+
+            await createScenario(formData);
+
+            const scenario = await prisma.scenario.findFirst({
+                where: { name: 'New Test Scenario' }
+            });
+
+            expect(scenario).toBeDefined();
+            expect(scenario?.name).toBe('New Test Scenario');
+            expect(scenario?.isBase).toBe(false);
+        });
+
+        it('should clone an existing scenario', async () => {
+            const formData = new FormData();
+            formData.append('name', 'Cloned Scenario');
+            formData.append('cloneFrom', testScenarioId);
+
+            await createScenario(formData);
+
+            const cloned = await prisma.scenario.findFirst({
+                where: { name: 'Cloned Scenario' },
+                include: {
+                    sites: true,
+                    assumptions: true
+                }
+            });
+
+            expect(cloned).toBeDefined();
+            expect(cloned?.sites).toHaveLength(1);
+            expect(cloned?.assumptions).toHaveLength(2);
+        });
+
+        it('should delete a non-base scenario', async () => {
+            await deleteScenario(testScenarioId);
+
+            const scenario = await prisma.scenario.findUnique({
+                where: { id: testScenarioId }
+            });
+
+            expect(scenario).toBeNull();
+        });
+
+        it('should not delete a base scenario', async () => {
+            await prisma.scenario.update({
+                where: { id: testScenarioId },
+                data: { isBase: true }
+            });
+
+            await expect(deleteScenario(testScenarioId)).rejects.toThrow();
+
+            const scenario = await prisma.scenario.findUnique({
+                where: { id: testScenarioId }
+            });
+
+            expect(scenario).not.toBeNull();
+        });
+    });
+
+    describe('Line Item Management', () => {
+        it('should add a line item to a site', async () => {
+            await addLineItem(testSiteId, {
+                catalogItemId: testCatalogItemId,
+                quantity: 5,
+                startQuarter: '2024Q2',
+                endQuarter: '2024Q4',
+                projectTag: 'Test Project'
+            });
+
+            const lineItems = await prisma.lineItem.findMany({
+                where: { siteId: testSiteId }
+            });
+
+            expect(lineItems).toHaveLength(1);
+            expect(lineItems[0].quantity).toBe(5);
+            expect(lineItems[0].projectTag).toBe('Test Project');
+        });
+
+        it('should update a line item', async () => {
+            const lineItem = await prisma.lineItem.create({
+                data: {
+                    siteId: testSiteId,
+                    catalogItemId: testCatalogItemId,
+                    quantity: 3,
+                    startQuarter: '2024Q1'
+                }
+            });
+
+            await updateLineItem(lineItem.id, {
+                quantity: 10,
+                startQuarter: '2024Q3',
+                projectTag: 'Updated Project'
+            });
+
+            const updated = await prisma.lineItem.findUnique({
+                where: { id: lineItem.id }
+            });
+
+            expect(updated?.quantity).toBe(10);
+            expect(updated?.startQuarter).toBe('2024Q3');
+            expect(updated?.projectTag).toBe('Updated Project');
+        });
+
+        it('should delete a line item', async () => {
+            const lineItem = await prisma.lineItem.create({
+                data: {
+                    siteId: testSiteId,
+                    catalogItemId: testCatalogItemId,
+                    quantity: 1,
+                    startQuarter: '2024Q1'
+                }
+            });
+
+            await deleteLineItem(lineItem.id);
+
+            const deleted = await prisma.lineItem.findUnique({
+                where: { id: lineItem.id }
+            });
+
+            expect(deleted).toBeNull();
+        });
+    });
+
+    describe('Assumption Management', () => {
+        it('should update scenario assumptions', async () => {
+            await updateScenarioAssumptions(testScenarioId, {
+                coolingOverhead: 1.5,
+                globalInflation: 0.15
+            });
+
+            const assumptions = await prisma.assumption.findMany({
+                where: { scenarioId: testScenarioId }
+            });
+
+            const cooling = assumptions.find(a => a.key === 'cooling_overhead');
+            const inflation = assumptions.find(a => a.key === 'inflation_rate');
+
+            expect(cooling?.value).toBe(1.5);
+            expect(inflation?.value).toBe(0.15);
+        });
+    });
+});

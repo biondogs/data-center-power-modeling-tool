@@ -109,6 +109,12 @@ model LineItem {
   endQuarter    String?  // null = indefinite or until projection end
   quantity      Int
 
+  // Historical tracking - actuals vs planned
+  actualStartQuarter  String?  // When deployment actually started
+  actualEndQuarter    String?  // When deployment actually ended
+  actualQuantity      Int?     // Actual number of units deployed
+  varianceNotes       String?  // Notes about variance
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

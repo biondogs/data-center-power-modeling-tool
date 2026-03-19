@@ -9,7 +9,10 @@ CREATE TABLE "CatalogItem" (
     "cost" REAL NOT NULL,
     "capacityType" TEXT,
     "capacityVal" REAL,
-    "unitsPerBlock" INTEGER NOT NULL DEFAULT 1,
+    "liquidCoolingCapacityKw" REAL,
+    "airCoolingCapacityKw" REAL,
+    "rackSpaceU" INTEGER,
+    "electricalCapacityKw" REAL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -20,6 +23,8 @@ CREATE TABLE "Scenario" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "isBase" BOOLEAN NOT NULL DEFAULT false,
+    "horizonStart" TEXT NOT NULL DEFAULT '2024Q1',
+    "horizonEnd" TEXT NOT NULL DEFAULT '2026Q4',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -29,8 +34,20 @@ CREATE TABLE "Site" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "scenarioId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "baselinePowerMw" REAL NOT NULL DEFAULT 0,
-    "powerLimitMw" REAL,
+    "totalItCapacityMw" REAL NOT NULL DEFAULT 0,
+    "electricalCapacityMw" REAL NOT NULL DEFAULT 0,
+    "liquidCoolingCapacityKw" REAL NOT NULL DEFAULT 0,
+    "airCoolingCapacityKw" REAL NOT NULL DEFAULT 0,
+    "totalRackSpaceU" INTEGER NOT NULL DEFAULT 0,
+    "usedRackSpaceU" INTEGER NOT NULL DEFAULT 0,
+    "electricityRatePerKwh" REAL NOT NULL DEFAULT 0.10,
+    "electricityRatePerKwy" REAL,
+    "inflationRate" REAL NOT NULL DEFAULT 0.10,
+    "baselineItPowerMw" REAL NOT NULL DEFAULT 0,
+    "baselineMechanicalMw" REAL NOT NULL DEFAULT 0,
+    "baselineLiquidCoolingKw" REAL NOT NULL DEFAULT 0,
+    "baselineAirCoolingKw" REAL NOT NULL DEFAULT 0,
+    "baselineElectricalKw" REAL NOT NULL DEFAULT 0,
     CONSTRAINT "Site_scenarioId_fkey" FOREIGN KEY ("scenarioId") REFERENCES "Scenario" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -43,6 +60,10 @@ CREATE TABLE "LineItem" (
     "startQuarter" TEXT NOT NULL,
     "endQuarter" TEXT,
     "quantity" INTEGER NOT NULL,
+    "actualStartQuarter" TEXT,
+    "actualEndQuarter" TEXT,
+    "actualQuantity" INTEGER,
+    "varianceNotes" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "LineItem_siteId_fkey" FOREIGN KEY ("siteId") REFERENCES "Site" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
