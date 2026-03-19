@@ -232,19 +232,21 @@ export function CatalogList({ initialItems }: CatalogListProps) {
             <DialogDescription>
               Are you sure you want to delete the following{" "}
               {selectedIds.size} item{selectedIds.size !== 1 ? "s" : ""}?
-              <ul className="mt-4 space-y-1 max-h-40 overflow-y-auto border rounded-md p-3">
-                {selectedItems.map((item) => (
-                  <li key={item.id} className="text-sm font-medium">
-                    • {item.name}
-                  </li>
-                ))}
-              </ul>
-              <span className="block mt-4 text-amber-600">
-                <AlertTriangle className="inline h-4 w-4 mr-1" />
-                Items that are in use by scenarios cannot be deleted.
-              </span>
             </DialogDescription>
           </DialogHeader>
+          <div className="mt-4">
+            <ul className="space-y-1 max-h-40 overflow-y-auto border rounded-md p-3">
+              {selectedItems.map((item) => (
+                <li key={item.id} className="text-sm font-medium">
+                  • {item.name}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-amber-600 text-sm">
+              <AlertTriangle className="inline h-4 w-4 mr-1" />
+              Items that are in use by scenarios cannot be deleted.
+            </p>
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
