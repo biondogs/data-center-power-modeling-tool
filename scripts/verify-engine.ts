@@ -42,12 +42,13 @@ async function main() {
         catalogItemId: catalogItem.id,
         catalogItem: catalogItem,
         projectTag: 'Test Project',
-        startQuarter: '2024Q2', // Starts Q2
-        endQuarter: '2025Q2',   // Ends Q2 next year (4 quarters active: 24Q2, 24Q3, 24Q4, 25Q1? No, 25Q2 is end, inclusive/exclusive?)
-        // Our logic: isActive = current >= start && current < end. So exclusive end?
-        // Let's check logic: `currentIdx >= startIdx && currentIdx < endIdx`
-        // So 2024Q2 to 2025Q2 means 2024Q2, 2024Q3, 2024Q4, 2025Q1. (4 quarters).
-        quantity: 100, // 100 units
+        startQuarter: '2024Q2',
+        endQuarter: '2025Q2',
+        quantity: 100,
+        actualStartQuarter: null as string | null,
+        actualEndQuarter: null as string | null,
+        actualQuantity: null as number | null,
+        varianceNotes: null as string | null,
         createdAt: new Date(),
         updatedAt: new Date()
     }

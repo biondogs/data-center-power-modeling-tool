@@ -119,7 +119,7 @@ async function main() {
             {
               name: 'BayView',
               totalItCapacityMw: 12,      // Total data hall capacity
-              mechanicalCapacityMw: 12,   // Mechanical capacity
+              electricalCapacityMw: 12,   // Electrical capacity
               electricityRatePerKwh: 0.10, // $/kW.h
               inflationRate: 0.10,
               baselineItPowerMw: 0,       // Will be populated from Baseline Power sheet
@@ -128,7 +128,7 @@ async function main() {
             {
               name: 'Mt.Wash',
               totalItCapacityMw: 1.05,
-              mechanicalCapacityMw: 1.05,
+              electricalCapacityMw: 1.05,
               electricityRatePerKwh: 0.0755, // MTW rate
               inflationRate: 0.0,         // No specific inflation mentioned
               baselineItPowerMw: 0,
@@ -137,7 +137,7 @@ async function main() {
             {
               name: 'Bloomberg',
               totalItCapacityMw: 1.2,
-              mechanicalCapacityMw: 1.2,
+              electricalCapacityMw: 1.2,
               electricityRatePerKwh: 0.10, // Same as Bayview initially
               inflationRate: 0.10,
               baselineItPowerMw: 0,

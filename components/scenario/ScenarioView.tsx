@@ -7,7 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SitePlanEditor } from "./SitePlanEditor";
 import { Button } from "@/components/ui/button";
-import { Settings, BarChart2, Table as TableIcon, FileText, PieChart } from "lucide-react";
+import { Settings, BarChart2, Table as TableIcon, FileText, FolderOpen, Calendar, Layers, Gauge, Zap, History } from "lucide-react";
+import { TimelineView } from "@/components/timeline/TimelineView";
+import { MultiSiteSummary } from "./MultiSiteSummary";
+import { CapacityAlertPanel } from "./CapacityAlertPanel";
+import { HistoricalTrackingPanel } from "./HistoricalTrackingPanel";
+import { WhatIfDialog } from "@/components/whatif/WhatIfDialog";
+import { updateLineItem } from "@/lib/actions";
 
 type ScenarioWithDetails = Scenario & {
     sites: (Site & {
@@ -23,6 +29,7 @@ import { ScenarioSummaryReport } from "./ScenarioSummaryReport";
 import { SiteSettingsEditor } from "./SiteSettingsEditor";
 import { ScenarioSettingsEditor } from "./ScenarioSettingsEditor";
 import { ExportScenarioButton } from "./ExportScenarioButton";
+import { ProjectPortfolioView } from "@/components/project/ProjectPortfolioView";
 
 interface ScenarioViewProps {
     scenario: ScenarioWithDetails;
@@ -35,10 +42,15 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
     const [activeSiteId, setActiveSiteId] = useState<string>(
         scenario.sites.length > 0 ? scenario.sites[0].id : ""
     );
+    const [whatIfOpen, setWhatIfOpen] = useState(false);
 
     const activeSite = scenario.sites.find((s) => s.id === activeSiteId);
     const activeProjection = activeSite ? projections[activeSite.id] : [];
 
+    const handleWhatIfApply = async (changes: any[]) => {
+        console.log("Applying what-if changes:", changes);
+        window.location.reload();
+    };
 
     return (
         <div className="space-y-6">
@@ -48,11 +60,21 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                     <h1 className="text-3xl font-bold">{scenario.name}</h1>
                     <p className="text-muted-foreground">{scenario.description}</p>
                 </div>
-                <ExportScenarioButton
-                    scenarioName={scenario.name}
-                    projections={projections}
-                    siteNames={siteNames}
-                />
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setWhatIfOpen(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Zap className="h-4 w-4" />
+                        What-If
+                    </Button>
+                    <ExportScenarioButton
+                        scenarioName={scenario.name}
+                        projections={projections}
+                        siteNames={siteNames}
+                    />
+                </div>
             </div>
 
             <Tabs defaultValue="plan" className="space-y-6">
@@ -67,12 +89,27 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                         <TabsTrigger value="reports" className="flex items-center gap-2">
                             <FileText className="h-4 w-4" /> Reports
                         </TabsTrigger>
+                        <TabsTrigger value="projects" className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4" /> Projects
+                        </TabsTrigger>
+                        <TabsTrigger value="timeline" className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" /> Timeline
+                        </TabsTrigger>
+                        <TabsTrigger value="sites" className="flex items-center gap-2">
+                            <Layers className="h-4 w-4" /> Multi-Site
+                        </TabsTrigger>
+                        <TabsTrigger value="capacity" className="flex items-center gap-2">
+                            <Gauge className="h-4 w-4" /> Capacity
+                        </TabsTrigger>
+                        <TabsTrigger value="history" className="flex items-center gap-2">
+                            <History className="h-4 w-4" /> History
+                        </TabsTrigger>
                         <TabsTrigger value="settings" className="flex items-center gap-2">
                             <Settings className="h-4 w-4" /> Settings
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* Site Selector (Only visible in Plan/Analysis likely, but fine here) */}
+                    {/* Site Selector */}
                     <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-muted-foreground">Active Site:</span>
                         <Select value={activeSiteId} onValueChange={setActiveSiteId}>
@@ -118,6 +155,50 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                     )}
                 </TabsContent>
 
+                <TabsContent value="projects">
+                    <ProjectPortfolioView scenario={scenario} projections={projections} />
+                </TabsContent>
+
+                <TabsContent value="timeline">
+                    {activeSite ? (
+                        <TimelineView
+                            lineItems={activeSite.lineItems}
+                            horizonStart={scenario.horizonStart}
+                            horizonEnd={scenario.horizonEnd}
+                            siteName={activeSite.name}
+                        />
+                    ) : (
+                        <Card><CardContent className="py-10">No site selected</CardContent></Card>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="sites">
+                    <MultiSiteSummary sites={Object.fromEntries(
+                        scenario.sites.map(site => [site.id, { name: site.name, projections: projections[site.id] || [] }])
+                    )} />
+                </TabsContent>
+
+                <TabsContent value="capacity">
+                    {activeSite ? (
+                        <CapacityAlertPanel site={activeSite} projections={activeProjection} />
+                    ) : (
+                        <Card><CardContent className="py-10">No site selected</CardContent></Card>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="history">
+                    {activeSite ? (
+                        <HistoricalTrackingPanel 
+                            lineItems={activeSite.lineItems} 
+                            onUpdate={(lineItemId, data) => {
+                                console.log('Update actuals for', lineItemId, data);
+                            }}
+                        />
+                    ) : (
+                        <Card><CardContent className="py-10">No site selected</CardContent></Card>
+                    )}
+                </TabsContent>
+
                 <TabsContent value="settings" className="space-y-6">
                     <ScenarioSettingsEditor scenarioId={scenario.id} assumptions={scenario.assumptions} />
                     {activeSite ? (
@@ -127,6 +208,14 @@ export function ScenarioView({ scenario, catalogItems, projections, siteNames }:
                     )}
                 </TabsContent>
             </Tabs>
+
+            <WhatIfDialog
+                scenario={scenario}
+                catalogItems={catalogItems}
+                open={whatIfOpen}
+                onOpenChange={setWhatIfOpen}
+                onApply={handleWhatIfApply}
+            />
         </div>
     );
 }
