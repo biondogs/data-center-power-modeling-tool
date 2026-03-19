@@ -205,6 +205,43 @@ export async function deleteCatalogItem(id: string) {
     }
 }
 
+export async function deleteCatalogItems(ids: string[]): Promise<{ success: boolean; deletedCount: number; failedCount: number; errors: string[] }> {
+    let deletedCount = 0;
+    let failedCount = 0;
+    const errors: string[] = [];
+
+    for (const id of ids) {
+        try {
+            const item = await prisma.catalogItem.findUnique({
+                where: { id },
+                include: { lineItems: true }
+            });
+
+            if (!item) {
+                failedCount++;
+                errors.push(`Item not found: ${id}`);
+                continue;
+            }
+
+            if (item.lineItems.length > 0) {
+                failedCount++;
+                errors.push(`Cannot delete "${item.name}" - it's in use by ${item.lineItems.length} line item(s)`);
+                continue;
+            }
+
+            await prisma.catalogItem.delete({ where: { id } });
+            deletedCount++;
+        } catch (e) {
+            console.error("Failed to delete catalog item", e);
+            failedCount++;
+            errors.push(`Failed to delete item ${id}`);
+        }
+    }
+
+    revalidatePath("/catalog");
+    return { success: deletedCount > 0, deletedCount, failedCount, errors };
+}
+
 // Site Settings Actions
 
 export async function updateSiteSettings(
@@ -277,23 +314,43 @@ export async function updateScenarioAssumptions(
     revalidatePath(`/scenarios/${scenarioId}`);
 }
 
-export async function deleteScenario(id: string) {
-    // Check if scenario is protected (isBase scenarios cannot be deleted)
-    const scenario = await prisma.scenario.findUnique({
-        where: { id }
-    });
-    
-    if (!scenario) {
-        throw new Error("Scenario not found");
+export async function deleteScenario(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const scenario = await prisma.scenario.findUnique({
+            where: { id }
+        });
+
+        if (!scenario) {
+            return { success: false, error: "Scenario not found" };
+        }
+
+        // Delete scenario and all related data (cascade will handle lineItems, sites, assumptions)
+        await prisma.scenario.delete({ where: { id } });
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (e) {
+        console.error("Failed to delete scenario", e);
+        return { success: false, error: "Failed to delete scenario" };
     }
-    
-    if (scenario.isBase) {
-        throw new Error("Base scenarios cannot be deleted");
+}
+
+export async function deleteScenarios(ids: string[]): Promise<{ success: boolean; deletedCount: number; error?: string }> {
+    try {
+        let deletedCount = 0;
+
+        for (const id of ids) {
+            const scenario = await prisma.scenario.findUnique({ where: { id } });
+            if (scenario) {
+                await prisma.scenario.delete({ where: { id } });
+                deletedCount++;
+            }
+        }
+
+        revalidatePath("/");
+        return { success: true, deletedCount };
+    } catch (e) {
+        console.error("Failed to delete scenarios", e);
+        return { success: false, deletedCount: 0, error: "Failed to delete scenarios" };
     }
-    
-    // Delete scenario and all related data (cascade will handle lineItems, sites, assumptions)
-    await prisma.scenario.delete({ where: { id } });
-    
-    revalidatePath("/");
-    redirect("/");
 }
