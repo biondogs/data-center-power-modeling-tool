@@ -173,7 +173,9 @@ export class CapacityAnalyzer {
         const violations: string[] = [];
 
         // Check current peak + new deployment
-        const peakPower = Math.max(...currentProjections.map(p => p.totalItPowerMw));
+        const peakPower = currentProjections.length > 0
+            ? Math.max(...currentProjections.map(p => p.totalItPowerMw))
+            : 0;
         if (site.totalItCapacityMw > 0 && peakPower + newPowerMw > site.totalItCapacityMw) {
             violations.push(`Power capacity exceeded: ${(peakPower + newPowerMw).toFixed(2)} MW > ${site.totalItCapacityMw} MW`);
         }
