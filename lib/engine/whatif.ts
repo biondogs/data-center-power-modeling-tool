@@ -94,7 +94,9 @@ export class WhatIfEngine {
       const capacity = CapacityAnalyzer.analyzeSiteCapacity(site, siteProjections);
       capacityAnalysis[site.id] = capacity;
 
-      const peak = Math.max(...siteProjections.map((p) => p.totalItPowerMw));
+      const peak = siteProjections.length > 0
+        ? Math.max(...siteProjections.map((p) => p.totalItPowerMw))
+        : 0;
       totalPeakPower += peak;
       totalCapex += siteProjections.reduce((sum, p) => sum + p.capex, 0);
       totalUtility += siteProjections.reduce((sum, p) => sum + p.utilityCost, 0);

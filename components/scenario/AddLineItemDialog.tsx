@@ -27,26 +27,33 @@ interface AddLineItemDialogProps {
 export function AddLineItemDialog({ siteId, catalogItems }: AddLineItemDialogProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
     async function onSubmit(formData: FormData) {
         setLoading(true);
-        const catalogItemId = formData.get("catalogItemId") as string;
-        const quantity = parseInt(formData.get("quantity") as string);
-        const startQuarter = formData.get("startQuarter") as string;
-        const endQuarter = formData.get("endQuarter") as string || undefined;
-        const projectTag = formData.get("projectTag") as string || "";
+        setError(null);
+        try {
+            const catalogItemId = formData.get("catalogItemId") as string;
+            const quantity = parseInt(formData.get("quantity") as string);
+            const startQuarter = formData.get("startQuarter") as string;
+            const endQuarter = formData.get("endQuarter") as string || undefined;
+            const projectTag = formData.get("projectTag") as string || undefined;
 
-        await addLineItem(siteId, {
-            catalogItemId,
-            quantity,
-            startQuarter,
-            endQuarter,
-            projectTag
-        });
-        router.refresh();
-        setLoading(false);
-        setOpen(false);
+            await addLineItem(siteId, {
+                catalogItemId,
+                quantity,
+                startQuarter,
+                endQuarter,
+                projectTag
+            });
+            router.refresh();
+            setOpen(false);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to add line item");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -64,6 +71,11 @@ export function AddLineItemDialog({ siteId, catalogItems }: AddLineItemDialogPro
                             Schedule equipment deployment for this site.
                         </DialogDescription>
                     </DialogHeader>
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded" role="alert">
+                            {error}
+                        </div>
+                    )}
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label className="text-right">Equipment</Label>
