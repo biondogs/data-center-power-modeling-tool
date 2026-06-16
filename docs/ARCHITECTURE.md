@@ -63,7 +63,13 @@ All files in `components/` have `"use client"`. They handle user interaction, fo
 - `ScenarioAggregateChart` — Multi-scenario power comparison (Recharts)
 
 **Scenario:**
-- `ScenarioView` — Main scenario page orchestrator
+- `ScenarioView` — Main scenario page orchestrator (composed of sub-components)
+- `ScenarioHeader` — Header with name/description + What-If/Export buttons
+- `ScenarioTabBar` — 9-tab navigation + site selector
+- `PlanAnalysisReportsTabs` — Plan/Analysis/Reports tab content
+- `ProjectTimelineSitesTabs` — Projects/Timeline/Sites tab content
+- `CapacityHistorySettingsTabs` — Capacity/History/Settings tab content
+- `WhatIfWrapper` — WhatIfDialog wrapper
 - `PowerChart` — Per-site power projection area chart (Recharts)
 - `ReportTable` — Quarterly data table per site
 - `ScenarioSummaryReport` — Cross-site aggregated report with metric cards
@@ -74,7 +80,9 @@ All files in `components/` have `"use client"`. They handle user interaction, fo
 - `ExportScenarioButton` — CSV / print / JSON export
 - `CapacityGauge` — Circular SVG utilization gauge
 - `CapacityAlertPanel` — Constraint analysis panel
-- `ScenariosList` — Scenario list with create/delete
+- `HistoricalTrackingPanel` — Actuals tracking per line item
+- `MultiSiteSummary` — Cross-site aggregate view
+- `ProjectPortfolioView` — Project-level metrics and grouping
 
 **Catalog:**
 - `CatalogList` — Hardware table with bulk selection and delete

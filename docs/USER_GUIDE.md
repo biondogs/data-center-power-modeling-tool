@@ -96,9 +96,20 @@ Click a scenario name to open the detail page:
 **Top section:**
 - Scenario metadata (name, description, timeline)
 - Global assumptions (cooling overhead, inflation rate)
-- Actions: Edit, Export, Delete
+- Actions: What-If Analysis, Export, Delete
 
-**Site sections (one per site):**
+**Tabbed Interface (9 tabs):**
+- **Plan** — Site deployment editor (add/modify line items with catalog picker)
+- **Analysis** — Power charts showing IT power, adjusted power, and capacity over time (Recharts)
+- **Reports** — Quarterly data tables per site with power/capex/utility breakdown
+- **Projects** — Project portfolio view grouped by `projectTag` with per-project metrics
+- **Timeline** — Gantt-style deployment timeline with lanes by project
+- **Sites** — Multi-site aggregate comparison across all sites in the scenario
+- **Capacity** — Constraint analysis with alert thresholds (OK/Warning/Critical)
+- **History** — Actual deployment tracking vs. planned
+- **Settings** — Scenario & site configuration (assumptions, capacity limits)
+
+**Site sections (one per site, within each tab):**
 - Site name and capacity limits
 - Power chart showing IT power, adjusted power, and capacity over time
 - Line items table with all deployments
@@ -217,10 +228,16 @@ Click the edit icon on any line item to modify quantity, timeline, or project ta
 
 Use what-if analysis to evaluate the impact of changes before committing:
 
-1. Add hypothetical deployments
-2. Adjust assumptions (cooling, inflation)
-3. See projected impact on power, cost, and capacity
-4. Compare against the base scenario
+1. **Open the What-If dialog** — Click the lightning bolt (⚡) button in the scenario header
+2. **Add hypothetical deployments** — Select catalog item, quantity, site, and quarter range
+3. **Modify existing deployments** — Adjust quantities, start/end quarters
+4. **Adjust assumptions** — Temporarily change cooling overhead or inflation rate
+4. **Test capacity limits** — See how different site capacity limits affect constraints
+5. **See projected impact** — Real-time deltas for peak power, total capex, utility costs
+6. **Compare against base scenario** — Original data overlaid on updated charts
+7. **Export analysis** — Download JSON with changes, projections, and deltas
+
+The What-If dialog has tabs for each change type (Add Item, Modify, Assumptions, Capacity) and shows an impact summary panel with key metrics.
 
 ---
 
