@@ -67,7 +67,24 @@ components/
   ui/                   # 22 shadcn/ui primitives
   layout/AppSidebar.tsx # Sidebar navigation
   dashboard/            # DashboardView, ScenarioAggregateChart
-  scenario/             # ScenarioView, PowerChart, CapacityGauge, dialogs
+  scenario/             
+    ScenarioView.tsx    # Main scenario orchestrator (composed of sub-components)
+    ScenarioHeader.tsx  # Header with name/description + What-If/Export
+    ScenarioTabBar.tsx  # 9-tab navigation + site selector
+    PlanAnalysisReportsTabs.tsx  # Plan/Analysis/Reports tabs
+    ProjectTimelineSitesTabs.tsx # Projects/Timeline/Sites tabs
+    CapacityHistorySettingsTabs.tsx # Capacity/History/Settings tabs
+    PowerChart.tsx      # Per-site power projection (Recharts)
+    ReportTable.tsx     # Quarterly data table
+    ScenarioSummaryReport.tsx # Cross-site aggregated report
+    SitePlanEditor.tsx  # Per-site line item table with add/edit
+    AddLineItemDialog.tsx / EditLineItemDialog.tsx # Line item forms
+    CreateScenarioDialog.tsx # New scenario form
+    DeleteScenarioButton.tsx # Confirmation + delete
+    ExportScenarioButton.tsx # CSV / print / JSON export
+    CapacityGauge.tsx   # Circular SVG utilization gauge
+    CapacityAlertPanel.tsx # Constraint analysis panel
+    WhatIfWrapper.tsx   # WhatIfDialog wrapper
   catalog/              # CatalogList, CatalogDialog
 
 lib/
@@ -83,6 +100,8 @@ lib/engine/             # Pure calculation engine (no I/O)
   capacity.ts           # Capacity analysis, constraint detection
   whatif.ts             # What-if scenario simulation
   time.ts               # Quarter parsing, range generation
+  project.ts            # Project tag grouping + metrics
+  timeline.ts           # Gantt-style timeline generation
 
 prisma/
   schema.prisma         # Database schema
@@ -280,10 +299,24 @@ vi.mock('@/lib/db', () => ({
 ```
 
 **Test files:**
-- `lib/engine/engine.test.ts` — Core engine tests (projector, aggregator, capacity, whatif)
-- `lib/engine/features.test.ts` — Feature-specific tests
+- `lib/engine/engine.test.ts` — Core engine tests (TimeUtils, Projector, Aggregator)
+- `lib/engine/features.test.ts` — Feature-specific tests (CapacityAnalyzer, ProjectAggregator, TimelineEngine, WhatIfEngine) including edge cases
 - `lib/actions.catalog.test.ts` — Catalog CRUD actions
 - `lib/actions.export.test.ts` — Export functionality
+- `lib/actions.realtime.test.ts` — Revalidation and real-time updates
+
+### Edge Case Test Coverage
+
+`lib/engine/features.test.ts` includes comprehensive edge case coverage:
+
+| Engine | Edge Cases Tested |
+|--------|-------------------|
+| **CapacityAnalyzer** | Zero capacity site, zero baseline power, cooling/rack limits, multi-quarter load variation, missing assumptions, empty line items |
+| **ProjectAggregator** | Empty items array, all unassigned items, mixed assigned/unassigned, multi-site project aggregation, missing catalog references |
+| **TimelineEngine** | Empty items, overlapping timelines, same timestamps, extreme quarter ranges, unknown categories, start-only items, lane ordering |
+| **WhatIfEngine** | Invalid change type, sequential changes, zero impact (no changes), empty catalog, excluded current item, alternative suggestions |
+
+These tests ensure robustness against invalid inputs, boundary conditions, and unexpected data states.
 
 ### Writing Engine Tests
 
