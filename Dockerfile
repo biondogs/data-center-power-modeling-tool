@@ -32,44 +32,36 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
-# Install openssl for Prisma
+# Install openssl for Prisma and dumb-init for proper signal handling
 RUN apt-get update && apt-get install -y \
     openssl \
+    dumb-init \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
-ENV DATABASE_URL="file:/data/dev.db"
 
-# Create data directory for SQLite persistence
-RUN mkdir -p /data && chown -R node:node /data
+# Copy package files for Prisma CLI access
+COPY package.json package-lock.json ./
+RUN npm ci --only=production && npx prisma generate
 
-# Copy standalone output from builder
+# Copy Prisma schema for migrations
+COPY prisma ./prisma
+
+# Copy built Next.js standalone output
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
 
-# Copy Prisma files for query engine
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Copy seed script for initial data
-COPY --from=builder /app/prisma/seed.ts ./prisma/
+# Create directory for SQLite database persistence
+RUN mkdir -p /data
 
-# Set proper permissions
-RUN chown -R node:node /app
-
-# Use non-root user
-USER node
-
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+USER node
 
-# Start the application
-CMD ["node", "server.js"]
+# Use entrypoint to run migrations and seed before starting the server
+ENTRYPOINT ["dumb-init", "/app/entrypoint.sh"]

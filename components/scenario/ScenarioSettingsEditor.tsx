@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { updateScenarioAssumptions } from "@/lib/actions";
-import { Save, Info } from "lucide-react";
+import { Save, Info, AlertCircle } from "lucide-react";
 
 interface ScenarioSettingsEditorProps {
     scenarioId: string;
@@ -16,6 +17,7 @@ interface ScenarioSettingsEditorProps {
 
 export function ScenarioSettingsEditor({ scenarioId, assumptions }: ScenarioSettingsEditorProps) {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const coolingOverhead = assumptions.find(a => a.key === 'cooling_overhead')?.value ?? 1.35;
     const globalInflation = assumptions.find(a => a.key === 'inflation_rate')?.value ?? 0.10;
@@ -27,12 +29,14 @@ export function ScenarioSettingsEditor({ scenarioId, assumptions }: ScenarioSett
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setError(null);
         setLoading(true);
         try {
-            await updateScenarioAssumptions(scenarioId, formData);
+            const result = await updateScenarioAssumptions(scenarioId, formData);
+            if (!result?.success) setError(result?.error || 'Failed to save settings');
         } catch (err) {
             console.error(err);
-            alert("Failed to save settings");
+            setError("Failed to save settings");
         } finally {
             setLoading(false);
         }
@@ -44,6 +48,12 @@ export function ScenarioSettingsEditor({ scenarioId, assumptions }: ScenarioSett
                 <CardTitle>Global Scenario Assumptions</CardTitle>
             </CardHeader>
             <CardContent>
+                {error && (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                         {/* Cooling Overhead (PUE) */}

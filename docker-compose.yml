@@ -1,7 +1,7 @@
 # Data Center Capacity & Power Modeling Tool - Docker Compose
 # Run: docker-compose up -d
 # Stop: docker-compose down
-# View logs: docker-compose logs -f
+# Rebuild: docker-compose up -d --build
 
 version: "3.8"
 
@@ -10,28 +10,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runner
-    container_name: data-center-tool
+    image: data-center-tool
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:/data/dev.db
+      - DATABASE_URL=file:///data/dev.db
     volumes:
-      # Persistent SQLite database storage
-      - data:/data
-      # Optional: Mount for logs
-      - logs:/app/logs
+      - db_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
 volumes:
-  data:
-    driver: local
-  logs:
+  db_data:
     driver: local

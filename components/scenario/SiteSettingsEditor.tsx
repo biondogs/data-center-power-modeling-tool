@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateSiteSettings } from "@/lib/actions";
-import { Save } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Save, AlertTriangle } from "lucide-react";
 
 interface SiteSettingsEditorProps {
     site: Site;
@@ -15,6 +16,7 @@ interface SiteSettingsEditorProps {
 
 export function SiteSettingsEditor({ site }: SiteSettingsEditorProps) {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         totalItCapacityMw: site.totalItCapacityMw,
         electricalCapacityMw: site.electricalCapacityMw || 0,
@@ -26,12 +28,14 @@ export function SiteSettingsEditor({ site }: SiteSettingsEditorProps) {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setError(null);
         setLoading(true);
         try {
-            await updateSiteSettings(site.id, formData);
+            const result = await updateSiteSettings(site.id, formData);
+            if (!result?.success) setError(result?.error || 'Failed to save settings');
         } catch (err) {
             console.error(err);
-            alert("Failed to save settings");
+            setError('Failed to save settings');
         } finally {
             setLoading(false);
         }
@@ -43,6 +47,13 @@ export function SiteSettingsEditor({ site }: SiteSettingsEditorProps) {
                 <CardTitle>{site.name} Site Configuration</CardTitle>
             </CardHeader>
             <CardContent>
+                {error && (
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                         {/* Capacity Settings */}

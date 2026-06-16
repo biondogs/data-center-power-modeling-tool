@@ -20,6 +20,14 @@ import { Plus } from "lucide-react";
 export function CreateScenarioDialog({ triggerLabel }: { triggerLabel?: string }) {
     const [open, setOpen] = useState(false);
 
+    const handleSubmit = async (formData: FormData) => {
+        try {
+            await createScenario(formData);
+        } catch {
+            // redirect or error - Next.js handles it
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -28,7 +36,7 @@ export function CreateScenarioDialog({ triggerLabel }: { triggerLabel?: string }
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                <form action={createScenario}>
+                <form action={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Create Scenario</DialogTitle>
                         <DialogDescription>
