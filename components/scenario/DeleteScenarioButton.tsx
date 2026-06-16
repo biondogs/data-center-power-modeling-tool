@@ -13,6 +13,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DeleteScenarioButtonProps {
     scenarioId: string;
@@ -29,17 +30,19 @@ export function DeleteScenarioButton({
 }: DeleteScenarioButtonProps) {
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     async function handleDelete() {
+        setError(null);
         setIsDeleting(true);
         const result = await deleteScenario(scenarioId);
         setIsDeleting(false);
-        
+
+        if (!result?.success) setError(result?.error || 'Failed');
+
         if (result.success) {
             setOpen(false);
             onDelete?.();
-        } else {
-            console.error("Failed to delete scenario:", result.error);
         }
     }
 
@@ -69,6 +72,11 @@ export function DeleteScenarioButton({
                         </span>
                     </DialogDescription>
                 </DialogHeader>
+                {error && (
+                    <Alert variant="destructive">
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
                 <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                     <Button variant="outline" onClick={() => setOpen(false)} disabled={isDeleting}>
                         Cancel

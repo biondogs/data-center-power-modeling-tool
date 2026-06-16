@@ -3,9 +3,11 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { ActionResult } from "@/lib/useServerAction";
 
-export async function createScenario(formData: FormData) {
-    const name = formData.get("name") as string;
+export async function createScenario(formData: FormData): Promise<ActionResult> {
+    try {
+        const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const cloneFromId = formData.get("cloneFromId") as string;
 
@@ -99,6 +101,9 @@ export async function createScenario(formData: FormData) {
 
     revalidatePath("/");
     redirect(`/scenarios/${newScenario.id}`);
+  } catch (e) {
+    throw new Error(e instanceof Error ? e.message : "Failed");
+  }
 }
 
 export async function addLineItem(siteId: string, data: {
@@ -107,17 +112,25 @@ export async function addLineItem(siteId: string, data: {
     startQuarter: string;
     endQuarter?: string;
     projectTag?: string;
-}) {
-    await prisma.lineItem.create({
-        data: {
-            siteId,
-            ...data
-        }
-    });
+}): Promise<ActionResult> {
+    try {
+        await prisma.lineItem.create({
+            data: {
+                siteId,
+                ...data
+            }
+        });
 
-    const site = await prisma.site.findUnique({ where: { id: siteId } });
-    if (site) {
-        revalidatePath(`/scenarios/${site.scenarioId}`);
+        const site = await prisma.site.findUnique({ where: { id: siteId } });
+        if (site) {
+            revalidatePath(`/scenarios/${site.scenarioId}`);
+        }
+
+        return { success: true };
+    } catch (e) {
+        console.error('[addLineItem] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
     }
 }
 
@@ -127,37 +140,53 @@ export async function updateLineItem(id: string, data: {
     startQuarter?: string;
     endQuarter?: string | null;
     projectTag?: string;
-}) {
-    const item = await prisma.lineItem.findUnique({ where: { id } });
-    if (!item) {
-        throw new Error("Line item not found");
-    }
-
-    await prisma.lineItem.update({
-        where: { id },
-        data: {
-            ...(data.catalogItemId && { catalogItemId: data.catalogItemId }),
-            ...(data.quantity !== undefined && { quantity: data.quantity }),
-            ...(data.startQuarter && { startQuarter: data.startQuarter }),
-            ...(data.endQuarter !== undefined && { endQuarter: data.endQuarter }),
-            ...(data.projectTag !== undefined && { projectTag: data.projectTag }),
+}): Promise<ActionResult> {
+    try {
+        const item = await prisma.lineItem.findUnique({ where: { id } });
+        if (!item) {
+            return { success: false, error: "Line item not found" };
         }
-    });
 
-    const site = await prisma.site.findUnique({ where: { id: item.siteId } });
-    if (site) {
-        revalidatePath(`/scenarios/${site.scenarioId}`);
-    }
-}
+        await prisma.lineItem.update({
+            where: { id },
+            data: {
+                ...(data.catalogItemId && { catalogItemId: data.catalogItemId }),
+                ...(data.quantity !== undefined && { quantity: data.quantity }),
+                ...(data.startQuarter && { startQuarter: data.startQuarter }),
+                ...(data.endQuarter !== undefined && { endQuarter: data.endQuarter }),
+                ...(data.projectTag !== undefined && { projectTag: data.projectTag }),
+            }
+        });
 
-export async function deleteLineItem(id: string) {
-    const item = await prisma.lineItem.findUnique({ where: { id } });
-    if (item) {
         const site = await prisma.site.findUnique({ where: { id: item.siteId } });
-        await prisma.lineItem.delete({ where: { id } });
         if (site) {
             revalidatePath(`/scenarios/${site.scenarioId}`);
         }
+
+        return { success: true };
+    } catch (e) {
+        console.error('[updateLineItem] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
+    }
+}
+
+export async function deleteLineItem(id: string): Promise<ActionResult> {
+    try {
+        const item = await prisma.lineItem.findUnique({ where: { id } });
+        if (item) {
+            const site = await prisma.site.findUnique({ where: { id: item.siteId } });
+            await prisma.lineItem.delete({ where: { id } });
+            if (site) {
+                revalidatePath(`/scenarios/${site.scenarioId}`);
+            }
+        }
+
+        return { success: true };
+    } catch (e) {
+        console.error('[deleteLineItem] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
     }
 }
 
@@ -172,10 +201,17 @@ export async function createCatalogItem(data: {
     cost: number;
     capacityType?: string;
     capacityVal?: number;
-}) {
-    await prisma.catalogItem.create({ data });
-    revalidatePath("/catalog");
-    revalidatePath("/");
+}): Promise<ActionResult> {
+    try {
+        await prisma.catalogItem.create({ data });
+        revalidatePath("/catalog");
+        revalidatePath("/");
+        return { success: true };
+    } catch (e) {
+        console.error('[createCatalogItem] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
+    }
 }
 
 export async function updateCatalogItem(id: string, data: {
@@ -187,21 +223,30 @@ export async function updateCatalogItem(id: string, data: {
     cost: number;
     capacityType?: string;
     capacityVal?: number;
-}) {
-    await prisma.catalogItem.update({
-        where: { id },
-        data
-    });
-    revalidatePath("/catalog");
+}): Promise<ActionResult> {
+    try {
+        await prisma.catalogItem.update({
+            where: { id },
+            data
+        });
+        revalidatePath("/catalog");
+        return { success: true };
+    } catch (e) {
+        console.error('[updateCatalogItem] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
+    }
 }
 
-export async function deleteCatalogItem(id: string) {
+export async function deleteCatalogItem(id: string): Promise<ActionResult> {
     try {
         await prisma.catalogItem.delete({ where: { id } });
         revalidatePath("/catalog");
+        return { success: true };
     } catch (e) {
-        console.error("Failed to delete catalog item", e);
-        throw new Error("Cannot delete item that is currently in use by a scenario.");
+        console.error('[deleteCatalogItem] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
     }
 }
 
@@ -254,13 +299,20 @@ export async function updateSiteSettings(
         baselineItPowerMw: number;
         baselineMechanicalMw: number;
     }
-) {
-    const site = await prisma.site.update({
-        where: { id: siteId },
-        data
-    });
+): Promise<ActionResult> {
+    try {
+        const site = await prisma.site.update({
+            where: { id: siteId },
+            data
+        });
 
-    revalidatePath(`/scenarios/${site.scenarioId}`);
+        revalidatePath(`/scenarios/${site.scenarioId}`);
+        return { success: true };
+    } catch (e) {
+        console.error('[updateSiteSettings] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
+    }
 }
 
 export async function updateScenarioAssumptions(
@@ -269,52 +321,59 @@ export async function updateScenarioAssumptions(
         coolingOverhead: number;
         globalInflation: number;
     }
-) {
-    const scenario = await prisma.scenario.findUnique({
-        where: { id: scenarioId },
-        include: { assumptions: true }
-    });
-
-    if (!scenario) throw new Error("Scenario not found");
-
-    // Update or create cooling_overhead assumption
-    const coolingAssumption = scenario.assumptions.find(a => a.key === 'cooling_overhead');
-    if (coolingAssumption) {
-        await prisma.assumption.update({
-            where: { id: coolingAssumption.id },
-            data: { value: data.coolingOverhead }
+): Promise<ActionResult> {
+    try {
+        const scenario = await prisma.scenario.findUnique({
+            where: { id: scenarioId },
+            include: { assumptions: true }
         });
-    } else {
-        await prisma.assumption.create({
-            data: {
-                scenarioId,
-                key: 'cooling_overhead',
-                value: data.coolingOverhead
-            }
-        });
+
+        if (!scenario) throw new Error("Scenario not found");
+
+        // Update or create cooling_overhead assumption
+        const coolingAssumption = scenario.assumptions.find(a => a.key === 'cooling_overhead');
+        if (coolingAssumption) {
+            await prisma.assumption.update({
+                where: { id: coolingAssumption.id },
+                data: { value: data.coolingOverhead }
+            });
+        } else {
+            await prisma.assumption.create({
+                data: {
+                    scenarioId,
+                    key: 'cooling_overhead',
+                    value: data.coolingOverhead
+                }
+            });
+        }
+
+        // Update or create inflation_rate assumption
+        const inflationAssumption = scenario.assumptions.find(a => a.key === 'inflation_rate');
+        if (inflationAssumption) {
+            await prisma.assumption.update({
+                where: { id: inflationAssumption.id },
+                data: { value: data.globalInflation }
+            });
+        } else {
+            await prisma.assumption.create({
+                data: {
+                    scenarioId,
+                    key: 'inflation_rate',
+                    value: data.globalInflation
+                }
+            });
+        }
+
+        revalidatePath(`/scenarios/${scenarioId}`);
+        return { success: true };
+    } catch (e) {
+        console.error('[updateScenarioAssumptions] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
     }
-
-    // Update or create inflation_rate assumption
-    const inflationAssumption = scenario.assumptions.find(a => a.key === 'inflation_rate');
-    if (inflationAssumption) {
-        await prisma.assumption.update({
-            where: { id: inflationAssumption.id },
-            data: { value: data.globalInflation }
-        });
-    } else {
-        await prisma.assumption.create({
-            data: {
-                scenarioId,
-                key: 'inflation_rate',
-                value: data.globalInflation
-            }
-        });
-    }
-
-    revalidatePath(`/scenarios/${scenarioId}`);
 }
 
-export async function deleteScenario(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteScenario(id: string): Promise<ActionResult> {
     try {
         const scenario = await prisma.scenario.findUnique({
             where: { id }
@@ -330,12 +389,13 @@ export async function deleteScenario(id: string): Promise<{ success: boolean; er
         revalidatePath("/");
         return { success: true };
     } catch (e) {
-        console.error("Failed to delete scenario", e);
-        return { success: false, error: "Failed to delete scenario" };
+        console.error('[deleteScenario] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
     }
 }
 
-export async function deleteScenarios(ids: string[]): Promise<{ success: boolean; deletedCount: number; error?: string }> {
+export async function deleteScenarios(ids: string[]): Promise<ActionResult> {
     try {
         let deletedCount = 0;
 
@@ -348,10 +408,11 @@ export async function deleteScenarios(ids: string[]): Promise<{ success: boolean
         }
 
         revalidatePath("/");
-        return { success: true, deletedCount };
+        return { success: true };
     } catch (e) {
-        console.error("Failed to delete scenarios", e);
-        return { success: false, deletedCount: 0, error: "Failed to delete scenarios" };
+        console.error('[deleteScenarios] Error:', e);
+        const msg = e instanceof Error ? e.message : 'Operation failed';
+        return { success: false, error: msg };
     }
 }
 

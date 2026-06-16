@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -26,10 +27,12 @@ interface CatalogDialogProps {
 export function CatalogDialog({ item, triggerLabel }: CatalogDialogProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const isEdit = !!item;
 
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        setError(null);
         setLoading(true);
 
         const formData = new FormData(event.currentTarget);
@@ -44,19 +47,23 @@ export function CatalogDialog({ item, triggerLabel }: CatalogDialogProps) {
             capacityVal: parseFloat(formData.get("capacityVal") as string) || 0
         };
 
-        try {
-            if (isEdit && item) {
-                await updateCatalogItem(item.id, data);
-            } else {
-                await createCatalogItem(data);
+        if (isEdit && item) {
+            const result = await updateCatalogItem(item.id, data);
+            if (!result?.success) {
+                setError(result?.error || 'Failed to update item.');
+                setLoading(false);
+                return;
             }
-            setOpen(false);
-        } catch (e) {
-            console.error(e);
-            alert("Failed to save item. Name might be duplicate.");
-        } finally {
-            setLoading(false);
+        } else {
+            const result = await createCatalogItem(data);
+            if (!result?.success) {
+                setError(result?.error || 'Failed to create item.');
+                setLoading(false);
+                return;
+            }
         }
+        setOpen(false);
+        setLoading(false);
     }
 
     return (
@@ -78,6 +85,11 @@ export function CatalogDialog({ item, triggerLabel }: CatalogDialogProps) {
                             Define equipment specifications.
                         </DialogDescription>
                     </DialogHeader>
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Name</Label>
